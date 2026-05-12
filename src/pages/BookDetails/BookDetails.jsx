@@ -1,11 +1,11 @@
 // Book Details Page - Shows full book information
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import BookCard from '../components/BookCard';
-import Loader from '../components/Loader';
-import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext';
-import { getBookById, getBooksByCategory, INDIAN_FEATURED_BOOKS } from '../services/api';
+import BookCard from '../../components/BookCard';
+import Loader from '../../components/Loader';
+import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
+import { getBookById, getBooksByCategory, INDIAN_FEATURED_BOOKS } from '../../services/api';
 import './BookDetails.css';
 
 const PLACEHOLDER = 'https://via.placeholder.com/300x450/1E293B/F97316?text=No+Cover';

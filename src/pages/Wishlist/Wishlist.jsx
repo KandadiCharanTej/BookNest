@@ -1,7 +1,7 @@
 // Wishlist Page - Shows saved favorite books
 import { Link } from 'react-router-dom';
-import { useWishlist } from '../context/WishlistContext';
-import { useCart } from '../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
+import { useCart } from '../../context/CartContext';
 import './Wishlist.css';
 
 const PLACEHOLDER = 'https://via.placeholder.com/80x120/1E293B/F97316?text=Book';

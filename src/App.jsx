@@ -22,8 +22,7 @@ import Wishlist from './pages/Wishlist';
 import Profile from './pages/Profile';
 import Orders from './pages/Orders';
 import OrderSuccess from './pages/OrderSuccess';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
+import { Login, Signup } from './pages/Auth';
 
 import './styles/global.css';
 

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext';
+import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 import './BookCard.css';
 
 const PLACEHOLDER = 'https://via.placeholder.com/128x192/1E293B/F97316?text=No+Cover';

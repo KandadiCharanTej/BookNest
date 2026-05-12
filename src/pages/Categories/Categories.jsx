@@ -1,9 +1,9 @@
 // Categories Page - Browse books by genre
 import { useState } from 'react';
-import CategoryBar from '../components/CategoryBar';
-import BookCard from '../components/BookCard';
-import Loader from '../components/Loader';
-import { getBooksByCategory } from '../services/api';
+import CategoryBar from '../../components/CategoryBar';
+import BookCard from '../../components/BookCard';
+import Loader from '../../components/Loader';
+import { getBooksByCategory } from '../../services/api';
 import './Categories.css';
 
 export default function Categories() {

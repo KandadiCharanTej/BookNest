@@ -1,9 +1,9 @@
 // Explore Page - Search and browse all books
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import BookCard from '../components/BookCard';
-import Loader from '../components/Loader';
-import { searchBooks } from '../services/api';
+import BookCard from '../../components/BookCard';
+import Loader from '../../components/Loader';
+import { searchBooks } from '../../services/api';
 import './Explore.css';
 
 export default function Explore() {

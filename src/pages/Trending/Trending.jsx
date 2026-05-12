@@ -1,8 +1,8 @@
 // Trending Page - Shows currently trending books
 import { useState, useEffect } from 'react';
-import BookCard from '../components/BookCard';
-import Loader from '../components/Loader';
-import { searchBooks } from '../services/api';
+import BookCard from '../../components/BookCard';
+import Loader from '../../components/Loader';
+import { searchBooks } from '../../services/api';
 import './Trending.css';
 
 export default function Trending() {

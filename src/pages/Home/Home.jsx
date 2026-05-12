@@ -1,9 +1,9 @@
 // Home Page - Shows hero section and featured Indian books
 import { useState, useEffect } from 'react';
-import Hero from '../components/Hero';
-import BookCard from '../components/BookCard';
-import Loader from '../components/Loader';
-import { INDIAN_FEATURED_BOOKS, searchBooks } from '../services/api';
+import Hero from '../../components/Hero';
+import BookCard from '../../components/BookCard';
+import Loader from '../../components/Loader';
+import { INDIAN_FEATURED_BOOKS, searchBooks } from '../../services/api';
 import './Home.css';
 
 export default function Home() {

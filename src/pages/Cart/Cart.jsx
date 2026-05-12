@@ -1,9 +1,9 @@
 // Cart Page - Shows items in cart with order summary
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-import PaymentModal from '../components/PaymentModal';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
+import PaymentModal from '../../components/PaymentModal';
 import './Cart.css';
 
 const PLACEHOLDER = 'https://via.placeholder.com/80x120/1E293B/F97316?text=Book';
