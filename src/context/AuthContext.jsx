@@ -10,21 +10,33 @@ export function AuthProvider({ children }) {
 
   // Load user data from localStorage on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('booknest_user');
-    const token = localStorage.getItem('booknest_token');
-    
-    if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
+    try {
+      const storedUser = localStorage.getItem('booknest_user');
+      const token = localStorage.getItem('booknest_token');
+      
+      if (token && storedUser) {
+        // Safe parsing to prevent app crash on corrupted data
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser && parsedUser.email) {
+          setUser(parsedUser);
+          setIsAuthenticated(true);
+        }
+      }
+    } catch (error) {
+      console.error("Auth initialization failed:", error);
+      // Clear corrupted data
+      localStorage.removeItem('booknest_user');
+      localStorage.removeItem('booknest_token');
+    } finally {
+      // Always set loading to false to avoid "hanging" app
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   // Simple login - simulate token and store user
   const login = (email, password) => {
-    // In a real app, this would be an API call
     const userData = {
-      name: 'Charan Kumar', // Default for demo
+      name: 'Charan Kumar',
       email: email,
       phone: '',
       address: {
@@ -35,22 +47,24 @@ export function AuthProvider({ children }) {
         city: '',
         state: '',
         pincode: ''
-      },
-      avatar: null
+      }
     };
 
-    // Check if user already has data in storage
-    const existing = localStorage.getItem(`profile_${email}`);
-    const finalUser = existing ? JSON.parse(existing) : userData;
+    try {
+      const existing = localStorage.getItem(`profile_${email}`);
+      const finalUser = existing ? JSON.parse(existing) : userData;
 
-    localStorage.setItem('booknest_token', 'fake-jwt-token');
-    localStorage.setItem('booknest_user', JSON.stringify(finalUser));
-    setUser(finalUser);
-    setIsAuthenticated(true);
-    return { success: true }; // Return object with success flag
+      localStorage.setItem('booknest_token', 'fake-jwt-token');
+      localStorage.setItem('booknest_user', JSON.stringify(finalUser));
+      setUser(finalUser);
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (e) {
+      return { success: false, message: 'Login failed. Please try again.' };
+    }
   };
 
-  // Simple signup - create user and store
+  // Simple signup
   const signup = (name, email, password) => {
     const userData = {
       name: name,
@@ -70,25 +84,24 @@ export function AuthProvider({ children }) {
     localStorage.setItem('booknest_user', JSON.stringify(userData));
     setUser(userData);
     setIsAuthenticated(true);
-    return { success: true }; // Return object with success flag
+    return { success: true };
   };
 
-  // Update profile data
+  // Update profile
   const updateProfile = (newData) => {
     const updatedUser = { ...user, ...newData };
     setUser(updatedUser);
     localStorage.setItem('booknest_user', JSON.stringify(updatedUser));
-    // Also save uniquely by email to persist across logouts
     localStorage.setItem(`profile_${user.email}`, JSON.stringify(updatedUser));
   };
 
-  // Logout - clear storage
+  // Logout
   const logout = () => {
     localStorage.removeItem('booknest_token');
     localStorage.removeItem('booknest_user');
     setUser(null);
     setIsAuthenticated(false);
-    window.location.href = '/'; // Force redirect to home on logout
+    window.location.href = '/'; 
   };
 
   return (
@@ -101,7 +114,8 @@ export function AuthProvider({ children }) {
       updateProfile,
       loading 
     }}>
-      {!loading && children}
+      {/* Important: Show children even if loading fails */}
+      {children}
     </AuthContext.Provider>
   );
 }
