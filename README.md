@@ -1,6 +1,6 @@
-# 📚 Smart BookNest India — Premium Digital Bookstore
+# 📚 Smart BookNest — Premium Digital Bookstore
 
-Smart BookNest India is a modern, visually stunning React JS application designed for book lovers. This project focuses on a premium user experience with a sleek dark-themed interface, localized for the Indian market with ₹ (Rupee) currency and featured Indian literature.
+Smart BookNest is a modern, visually stunning React JS application designed for book lovers. This project focuses on a premium user experience with a sleek dark-themed interface, localized for the Indian market with ₹ (Rupee) currency and featured Indian literature.
 
 **Built for:** College Viva, Portfolio Showcase, and React Learning.
 

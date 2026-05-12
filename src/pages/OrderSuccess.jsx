@@ -41,7 +41,7 @@ export default function OrderSuccess() {
             <span className="check-icon">✓</span>
           </div>
           <h1 className="success-title">Order Placed Successfully!</h1>
-          <p className="success-msg">Thank you for shopping with Smart BookNest India.</p>
+          <p className="success-msg">Thank you for shopping with Smart BookNest.</p>
         </div>
 
         <div className="success-grid">

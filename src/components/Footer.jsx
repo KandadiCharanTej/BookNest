@@ -33,7 +33,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>© {new Date().getFullYear()} Smart BookNest India. Built with ❤️ and React.</p>
+          <p>© {new Date().getFullYear()} Smart BookNest. Built with ❤️ and React.</p>
         </div>
       </div>
     </footer>

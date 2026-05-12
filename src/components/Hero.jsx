@@ -8,7 +8,7 @@ export default function Hero() {
       <div className="hero-bg-glow hero-bg-glow-2"></div>
       <div className="container hero-inner">
         <div className="hero-content">
-          <span className="hero-badge">✨ India's Digital Bookshelf</span>
+          <span className="hero-badge">✨ Your Digital Bookshelf</span>
           <h1 className="hero-title">
             Find Your Next<br />
             <span className="hero-accent">Favorite Book</span>
