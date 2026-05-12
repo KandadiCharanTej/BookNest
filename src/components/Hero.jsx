@@ -14,7 +14,7 @@ export default function Hero() {
             <span className="hero-accent">Favorite Book</span>
           </h1>
           <p className="hero-subtitle">
-            From Wings of Fire to Shiva Trilogy — discover thousands of books from Indian and international authors. Your next great read is just a click away.
+            From Wings of Fire to Shiva Trilogy — discover thousands of books from the best authors. Your next great read is just a click away.
           </p>
           <div className="hero-actions">
             <Link to="/explore" className="btn btn-primary btn-lg">
