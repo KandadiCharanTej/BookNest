@@ -1,0 +1,152 @@
+.book-details-page {
+  padding-top: 40px;
+  min-height: 100vh;
+}
+
+.details-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.details-image-wrap {
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-lg);
+  position: sticky;
+  top: 100px;
+}
+
+.details-image-wrap:hover {
+  transform: none;
+}
+
+.details-image {
+  max-height: 420px;
+  width: auto;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+}
+
+.details-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.details-title {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.details-author {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+}
+
+.details-rating {
+  font-size: 1.1rem;
+}
+
+.detail-stars {
+  font-size: 1.2rem;
+}
+
+.detail-no-rating {
+  color: #64748B;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.details-price {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--accent-primary);
+}
+
+.details-meta {
+  display: flex;
+  gap: 24px;
+  padding: 16px 0;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.meta-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.details-description {
+  margin-top: 8px;
+}
+
+.details-description h3 {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.details-description p {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.75;
+}
+
+.details-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* Wikipedia Button */
+.btn-wiki {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60A5FA;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.btn-wiki:hover {
+  background: rgba(59, 130, 246, 0.22);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .details-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .details-image-wrap {
+    position: static;
+    max-width: 280px;
+    margin: 0 auto;
+  }
+  .details-title {
+    font-size: 1.5rem;
+  }
+  .details-price {
+    font-size: 1.4rem;
+  }
+  .details-actions {
+    flex-direction: column;
+  }
+}

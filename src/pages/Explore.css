@@ -1,0 +1,30 @@
+.explore-page {
+  padding-top: 40px;
+  min-height: 100vh;
+}
+
+.explore-header {
+  margin-bottom: 36px;
+}
+
+.page-subtitle {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 24px;
+}
+
+.explore-search {
+  display: flex;
+  gap: 12px;
+  max-width: 600px;
+}
+
+.explore-search-input {
+  flex: 1;
+}
+
+@media (max-width: 480px) {
+  .explore-search {
+    flex-direction: column;
+  }
+}

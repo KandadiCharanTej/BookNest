@@ -1,0 +1,135 @@
+.orders-page {
+  padding-top: 40px;
+  min-height: 100vh;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.order-card {
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.order-header-main {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.order-date {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.order-id {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-family: monospace;
+}
+
+.status-badge {
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--accent-primary);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.order-card-body {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr;
+  gap: 32px;
+}
+
+.order-books {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order-book-item {
+  display: flex;
+  gap: 12px;
+}
+
+.order-book-img {
+  width: 50px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.order-book-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.order-book-qty {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.order-delivery h4 {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.order-delivery p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.order-total-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: right;
+  justify-content: flex-end;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.main-total {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .order-card-body {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .order-total-info {
+    text-align: left;
+    border-top: 1px solid var(--border-color);
+    padding-top: 16px;
+  }
+}

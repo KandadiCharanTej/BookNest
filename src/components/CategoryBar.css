@@ -1,0 +1,37 @@
+.category-bar {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 8px 0 16px;
+  scrollbar-width: none;
+}
+
+.category-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.cat-chip {
+  padding: 8px 22px;
+  border-radius: 50px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.cat-chip:hover {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  background: rgba(249, 115, 22, 0.08);
+}
+
+.cat-chip.active {
+  background: linear-gradient(135deg, var(--accent-primary), #EA580C);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3);
+}

@@ -1,0 +1,13 @@
+.home-page {
+  min-height: 100vh;
+}
+
+.error-msg {
+  padding: 16px 24px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--danger);
+  text-align: center;
+  margin: 24px 0;
+}
