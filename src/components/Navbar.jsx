@@ -28,7 +28,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link to="/" className="navbar-logo" id="nav-logo">
           <span className="logo-icon">📚</span>
-          <span className="logo-text">Book<span className="logo-accent">Nest</span></span>
+          <span className="logo-text">Smart <span className="logo-accent">BookNest</span></span>
         </Link>
 
         {/* Search Bar */}

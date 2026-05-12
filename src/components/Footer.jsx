@@ -7,9 +7,9 @@ export default function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div className="footer-brand">
-            <h3 className="footer-logo">📚 Book<span className="logo-accent">Nest</span> India</h3>
+            <h3 className="footer-logo">📚 Smart <span className="logo-accent">BookNest</span></h3>
             <p className="footer-desc">
-              India's premium digital bookstore. Discover Indian and international books — from mythology to startups.
+              Your premium digital bookstore. Discover thousands of books — from mythology to startups.
             </p>
           </div>
           <div className="footer-col">

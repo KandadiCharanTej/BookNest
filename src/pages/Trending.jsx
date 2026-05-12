@@ -16,7 +16,7 @@ export default function Trending() {
       setLoading(true);
       setError(null);
       try {
-        const results = await searchBooks('bestseller 2024 india', 20);
+        const results = await searchBooks('bestselling books 2024', 20);
         setBooks(results);
       } catch (err) {
         setError('Failed to load trending books. Please try again.');

@@ -21,7 +21,7 @@ export default function Explore() {
       setLoading(true);
       setError(null);
       try {
-        const searchTerm = searchQuery || 'popular books india';
+        const searchTerm = searchQuery || 'bestselling books';
         const results = await searchBooks(searchTerm, 20);
         setBooks(results);
       } catch (err) {
@@ -47,7 +47,7 @@ export default function Explore() {
         <p className="page-subtitle">
           {searchQuery
             ? `Showing results for "${searchQuery}"`
-            : 'Discover books from Indian and international authors'}
+            : 'Discover thousands of amazing books from all over the world'}
         </p>
 
         {/* Search form */}
