@@ -1,29 +1,55 @@
-// ===== Google Books API Service =====
+// ===== Google Books API Service with Caching Layer =====
 
 const BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
 
+// Simple in-memory cache to make the app "Instant" when navigating back
+const cache = {
+  search: {},
+  details: {},
+  categories: {}
+};
+
 // Fetch books by search query
 export async function searchBooks(query, maxResults = 20) {
+  if (cache.search[query]) return cache.search[query];
+  
   const res = await fetch(`${BASE_URL}?q=${encodeURIComponent(query)}&maxResults=${maxResults}`);
   if (!res.ok) throw new Error('Failed to fetch books');
   const data = await res.json();
-  return (data.items || []).map(formatBook);
+  const results = (data.items || []).map(formatBook);
+  
+  cache.search[query] = results;
+  return results;
 }
 
 // Fetch a single book by ID
 export async function getBookById(id) {
+  // Check static Indian books first (instant)
+  const staticBook = INDIAN_FEATURED_BOOKS.find(b => b.id === id);
+  if (staticBook) return staticBook;
+
+  if (cache.details[id]) return cache.details[id];
+
   const res = await fetch(`${BASE_URL}/${id}`);
   if (!res.ok) throw new Error('Failed to fetch book details');
   const data = await res.json();
-  return formatBook(data);
+  const book = formatBook(data);
+  
+  cache.details[id] = book;
+  return book;
 }
 
 // Fetch books by category/genre
 export async function getBooksByCategory(category, maxResults = 10) {
+  if (cache.categories[category]) return cache.categories[category];
+
   const res = await fetch(`${BASE_URL}?q=subject:${encodeURIComponent(category)}&maxResults=${maxResults}&orderBy=relevance`);
   if (!res.ok) throw new Error('Failed to fetch books');
   const data = await res.json();
-  return (data.items || []).map(formatBook);
+  const results = (data.items || []).map(formatBook);
+  
+  cache.categories[category] = results;
+  return results;
 }
 
 // Format raw API data into a clean book object
@@ -57,7 +83,6 @@ function generateIndianPrice(title) {
 }
 
 // ===== Static Indian Featured Books =====
-// These are hardcoded Indian books with Open Library cover images
 export const INDIAN_FEATURED_BOOKS = [
   {
     id: 'indian-1',
@@ -93,7 +118,7 @@ export const INDIAN_FEATURED_BOOKS = [
     id: 'indian-3',
     title: 'The Alchemist',
     authors: ['Paulo Coelho'],
-    description: 'A magical story of Santiago, an Andalusian shepherd boy who yearns to travel in search of a worldly treasure. One of the most-read books in India across all age groups.',
+    description: 'A magical story of Santiago, an Andalusian shepherd boy who yearns to travel in search of a worldly treasure.',
     categories: ['Fiction'],
     rating: 4.4,
     ratingsCount: 15000,
@@ -108,7 +133,7 @@ export const INDIAN_FEATURED_BOOKS = [
     id: 'indian-4',
     title: 'Atomic Habits',
     authors: ['James Clear'],
-    description: 'A proven framework for improving every day. James Clear reveals practical strategies that will teach you how to form good habits, break bad ones, and master tiny behaviors that lead to remarkable results.',
+    description: 'A proven framework for improving every day.',
     categories: ['Self-Help'],
     rating: 4.7,
     ratingsCount: 20000,
@@ -123,7 +148,7 @@ export const INDIAN_FEATURED_BOOKS = [
     id: 'indian-5',
     title: 'India After Gandhi',
     authors: ['Ramachandra Guha'],
-    description: 'A comprehensive and authoritative account of the history of the world\'s largest democracy — India — from independence in 1947 to the present day.',
+    description: 'A comprehensive account of the history of the world\'s largest democracy — India.',
     categories: ['Indian History'],
     rating: 4.6,
     ratingsCount: 6700,
@@ -138,7 +163,7 @@ export const INDIAN_FEATURED_BOOKS = [
     id: 'indian-6',
     title: 'Rich Dad Poor Dad',
     authors: ['Robert T. Kiyosaki'],
-    description: 'What the rich teach their kids about money — that the poor and middle class do not! One of the top-selling personal finance books in India.',
+    description: 'What the rich teach their kids about money.',
     categories: ['Business'],
     rating: 4.3,
     ratingsCount: 18000,
@@ -153,7 +178,7 @@ export const INDIAN_FEATURED_BOOKS = [
     id: 'indian-7',
     title: 'Ikigai',
     authors: ['Héctor García', 'Francesc Miralles'],
-    description: 'The Japanese secret to a long and happy life. Discover the concept of ikigai — your reason for being — and learn how to apply it for a fulfilling life.',
+    description: 'The Japanese secret to a long and happy life.',
     categories: ['Self-Help'],
     rating: 4.2,
     ratingsCount: 12000,
@@ -168,7 +193,7 @@ export const INDIAN_FEATURED_BOOKS = [
     id: 'indian-8',
     title: 'Think Like a Monk',
     authors: ['Jay Shetty'],
-    description: 'Drawing from his experience as a monk, Jay Shetty shares timeless wisdom on overcoming negativity, finding purpose, and living a meaningful life.',
+    description: 'Timeless wisdom on overcoming negativity and finding purpose.',
     categories: ['Self-Help'],
     rating: 4.3,
     ratingsCount: 7800,
