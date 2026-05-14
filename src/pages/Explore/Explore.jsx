@@ -3,10 +3,12 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import BookCard from '../../components/BookCard';
 import Loader from '../../components/Loader';
+import { useLanguage } from '../../context/LanguageContext';
 import { searchBooks } from '../../services/api';
 import './Explore.css';
 
 export default function Explore() {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
 
@@ -51,25 +53,25 @@ export default function Explore() {
   return (
     <main className="explore-page container" id="explore-page">
       <div className="explore-header">
-        <h1 className="page-title">📚 Explore Books</h1>
+        <h1 className="page-title">📚 {t.explore}</h1>
         <p className="page-subtitle">
           {searchQuery
             ? `Showing results for "${searchQuery}"`
-            : 'Discover thousands of amazing books from all over the world'}
+            : t.heroSubtitle}
         </p>
 
         {/* Search form */}
         <form className="explore-search" onSubmit={handleSearch}>
           <input
             type="text"
-            placeholder="Search by title, author, or genre..."
+            placeholder={t.searchPlaceholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="form-input explore-search-input"
             id="explore-search-input"
           />
           <button type="submit" className="btn btn-primary" id="explore-search-btn">
-            🔍 Search
+            🔍 {t.explore}
           </button>
         </form>
       </div>

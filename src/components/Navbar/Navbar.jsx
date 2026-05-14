@@ -10,7 +10,6 @@ import './Navbar.css';
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const { cartCount } = useCart();
-  const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -30,15 +29,6 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Handle search form submit
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (query.trim()) {
-      navigate(`/explore?search=${encodeURIComponent(query.trim())}`);
-      setQuery('');
-      setMenuOpen(false);
-    }
-  };
 
   return (
     <nav className="navbar" id="main-navbar">
@@ -48,41 +38,11 @@ export default function Navbar() {
           Smart <span className="logo-accent">BookNest</span>
         </Link>
 
-        {/* Search Bar */}
-        <form className="navbar-search" onSubmit={handleSearch}>
-          <span className="search-icon">🔍</span>
-          <input
-            type="text"
-            className="search-input"
-            placeholder={t.searchPlaceholder}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </form>
 
         <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>
           <NavLink to="/" className="nav-link" onClick={() => setMenuOpen(false)}>{t.home}</NavLink>
           <NavLink to="/explore" className="nav-link" onClick={() => setMenuOpen(false)}>{t.explore}</NavLink>
-          <NavLink to="/trending" className="nav-link" onClick={() => setMenuOpen(false)}>{t.trending}</NavLink>
-          <NavLink to="/categories" className="nav-link" onClick={() => setMenuOpen(false)}>{t.categories}</NavLink>
           
-          <div className="nav-controls">
-            <button className="control-btn theme-toggle" onClick={toggleTheme} title="Toggle Theme">
-              {isDarkMode ? '☀️' : '🌙'}
-            </button>
-            
-            <select 
-              className="lang-select" 
-              value={lang} 
-              onChange={(e) => changeLanguage(e.target.value)}
-              aria-label="Select Language"
-            >
-              <option value="en">EN</option>
-              <option value="hi">हिन्दी</option>
-              <option value="te">తెలుగు</option>
-            </select>
-          </div>
-
           <NavLink to="/cart" className="nav-link cart-link" onClick={() => setMenuOpen(false)}>
             {t.cart}
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
@@ -101,9 +61,41 @@ export default function Navbar() {
 
               {dropdownOpen && (
                 <div className="profile-dropdown glass-card">
+                  <div className="dropdown-header">
+                    <span className="dropdown-user-name">{user?.name}</span>
+                    <span className="dropdown-user-email">{user?.email}</span>
+                  </div>
+                  <div className="dropdown-divider"></div>
+                  
                   <Link to="/profile" className="dropdown-item" onClick={() => setDropdownOpen(false)}>👤 {t.profile}</Link>
                   <Link to="/orders" className="dropdown-item" onClick={() => setDropdownOpen(false)}>📦 {t.orders}</Link>
                   <Link to="/wishlist" className="dropdown-item" onClick={() => setDropdownOpen(false)}>♥ {t.wishlist}</Link>
+                  
+                  <div className="dropdown-divider"></div>
+                  
+                  <div className="dropdown-settings">
+                    <div className="setting-item">
+                      <span>{isDarkMode ? '🌙' : '☀️'} Theme</span>
+                      <button className="mini-toggle" onClick={toggleTheme}>
+                        <div className={`toggle-track ${isDarkMode ? 'active' : ''}`}>
+                          <div className="toggle-thumb"></div>
+                        </div>
+                      </button>
+                    </div>
+                    <div className="setting-item">
+                      <span>🌐 Lang</span>
+                      <select 
+                        className="lang-select-mini" 
+                        value={lang} 
+                        onChange={(e) => changeLanguage(e.target.value)}
+                      >
+                        <option value="en">EN</option>
+                        <option value="hi">हिन्दी</option>
+                        <option value="te">తెలుగు</option>
+                      </select>
+                    </div>
+                  </div>
+
                   <div className="dropdown-divider"></div>
                   <button className="dropdown-item logout-item" onClick={() => { logout(); setDropdownOpen(false); }}>{t.logout}</button>
                 </div>
