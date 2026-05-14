@@ -71,13 +71,7 @@ export default function Cart() {
                 <p className="cart-item-price">₹{item.price}</p>
               </div>
               <div className="cart-item-controls">
-                {/* Quantity Controls */}
-                <div className="qty-controls">
-                  <button className="qty-btn" onClick={() => updateQuantity(item.id, -1)}>−</button>
-                  <span className="qty-value">{item.quantity}</span>
-                  <button className="qty-btn" onClick={() => updateQuantity(item.id, 1)}>+</button>
-                </div>
-                <p className="cart-item-subtotal">₹{item.price * item.quantity}</p>
+                <p className="cart-item-subtotal">₹{item.price}</p>
                 <button className="btn btn-danger btn-sm" onClick={() => removeFromCart(item.id)}>{t.remove}</button>
               </div>
             </div>
@@ -89,7 +83,7 @@ export default function Cart() {
           <h3 className="summary-title">{t.details}</h3>
           <div className="summary-row">
             <span>{t.items}</span>
-            <span>{cartItems.reduce((sum, item) => sum + item.quantity, 0)}</span>
+            <span>{cartItems.length}</span>
           </div>
           <div className="summary-row">
             <span>{t.subtotal}</span>
@@ -109,7 +103,7 @@ export default function Cart() {
             id="checkout-btn"
             onClick={handleProceed}
           >
-            Proceed to Checkout
+            {t.checkout}
           </button>
           <button className="btn btn-ghost clear-btn" onClick={clearCart}>
             Clear Cart

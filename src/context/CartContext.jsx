@@ -23,10 +23,8 @@ export function CartProvider({ children }) {
     setCartItems((prev) => {
       const exists = prev.find((item) => item.id === book.id);
       if (exists) {
-        showToast('Quantity updated!');
-        return prev.map((item) =>
-          item.id === book.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
+        showToast('Already in cart');
+        return prev;
       }
       showToast('Added to cart!');
       return [...prev, { ...book, quantity: 1 }];
@@ -39,6 +37,8 @@ export function CartProvider({ children }) {
   };
 
   const updateQuantity = (bookId, delta) => {
+    // Keeping this for potential use in the cart page if needed, 
+    // but primary behavior is now unique items.
     setCartItems((prev) =>
       prev
         .map((item) =>
@@ -50,7 +50,7 @@ export function CartProvider({ children }) {
 
   const clearCart = () => setCartItems([]);
 
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = cartItems.length;
   const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
