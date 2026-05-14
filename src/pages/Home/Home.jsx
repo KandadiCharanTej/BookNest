@@ -43,7 +43,7 @@ export default function Home() {
         <section className="section" id="featured-indian">
           <h2 className="section-title">✨ Featured Books</h2>
           <div className="books-grid">
-            {INDIAN_FEATURED_BOOKS.map((book) => (
+            {INDIAN_FEATURED_BOOKS.slice(0, 8).map((book) => (
               <BookCard key={book.id} book={book} />
             ))}
           </div>

@@ -1,26 +1,21 @@
 // Order Success Page - Shows after successful simulated payment
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './OrderSuccess.css';
 
 export default function OrderSuccess() {
-  const [latestOrder, setLatestOrder] = useState(null);
-  const [deliveryDate, setDeliveryDate] = useState('');
-
-  useEffect(() => {
-    // Get the most recent order from LocalStorage
+  const [latestOrder] = useState(() => {
     const orders = JSON.parse(localStorage.getItem('booknest_orders') || '[]');
-    if (orders.length > 0) {
-      const order = orders[orders.length - 1];
-      setLatestOrder(order);
+    return orders.length > 0 ? orders[orders.length - 1] : null;
+  });
 
-      // Generate a fake delivery date (3-5 days from now)
-      const date = new Date();
-      date.setDate(date.getDate() + 3 + Math.floor(Math.random() * 3));
-      const options = { day: 'numeric', month: 'long', year: 'numeric' };
-      setDeliveryDate(date.toLocaleDateString('en-IN', options));
-    }
-  }, []);
+  const [deliveryDate] = useState(() => {
+    if (!latestOrder) return '';
+    const date = new Date();
+    date.setDate(date.getDate() + 3 + Math.floor(Math.random() * 3));
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return date.toLocaleDateString('en-IN', options);
+  });
 
   if (!latestOrder) {
     return (

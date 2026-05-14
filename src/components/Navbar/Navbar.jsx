@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useEffect, useRef } from 'react';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -11,6 +12,18 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Handle search form submit
   const handleSearch = (e) => {
@@ -56,11 +69,10 @@ export default function Navbar() {
           </NavLink>
 
           {isAuthenticated ? (
-            <div className="nav-profile-container">
+            <div className="nav-profile-container" ref={dropdownRef}>
               <button 
                 className="profile-trigger" 
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                onBlur={() => setTimeout(() => setDropdownOpen(false), 200)}
               >
                 <div className="nav-avatar">{user?.name?.charAt(0)}</div>
                 <span className="nav-user-name">Hi, {user?.name?.split(' ')[0]}</span>
@@ -69,11 +81,11 @@ export default function Navbar() {
 
               {dropdownOpen && (
                 <div className="profile-dropdown glass-card">
-                  <Link to="/profile" className="dropdown-item">👤 My Profile</Link>
-                  <Link to="/orders" className="dropdown-item">📦 My Orders</Link>
-                  <Link to="/wishlist" className="dropdown-item">♥ Wishlist</Link>
+                  <Link to="/profile" className="dropdown-item" onClick={() => setDropdownOpen(false)}>👤 My Profile</Link>
+                  <Link to="/orders" className="dropdown-item" onClick={() => setDropdownOpen(false)}>📦 My Orders</Link>
+                  <Link to="/wishlist" className="dropdown-item" onClick={() => setDropdownOpen(false)}>♥ Wishlist</Link>
                   <div className="dropdown-divider"></div>
-                  <button className="dropdown-item logout-item" onClick={logout}>Logout</button>
+                  <button className="dropdown-item logout-item" onClick={() => { logout(); setDropdownOpen(false); }}>Logout</button>
                 </div>
               )}
             </div>

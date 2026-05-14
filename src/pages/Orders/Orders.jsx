@@ -1,5 +1,5 @@
 // Orders Page - Displays user order history from LocalStorage
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Orders.css';
 

@@ -4,8 +4,14 @@ import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  
+  if (isAuthenticated) {
+    window.location.href = '/';
+    return null;
+  }
+  
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
 
