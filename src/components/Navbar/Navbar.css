@@ -92,24 +92,44 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(128, 128, 128, 0.05);
+  border-radius: 12px;
+  border: 1px solid transparent;
+  transition: var(--transition);
+}
+
+.cart-link:hover {
+  background: rgba(128, 128, 128, 0.1);
+  border-color: var(--border-color);
+  transform: translateY(-1px);
 }
 
 .cart-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  background: var(--accent-primary);
+  top: -6px;
+  right: -6px;
+  background: var(--accent-gradient);
   color: white;
-  font-size: 0.7rem;
-  font-weight: 700;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 800;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 8px rgba(249, 115, 22, 0.3);
   border: 2px solid var(--bg-secondary);
+  animation: badgePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes badgePop {
+  0% { transform: scale(0.5); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
 /* Dropdown & Profile Section */

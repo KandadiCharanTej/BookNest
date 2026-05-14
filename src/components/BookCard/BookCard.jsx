@@ -7,7 +7,7 @@ import './BookCard.css';
 const PLACEHOLDER = 'https://via.placeholder.com/128x192/1E293B/F97316?text=No+Cover';
 
 export default function BookCard({ book }) {
-  const { addToCart, cartItems } = useCart();
+  const { addToCart, cartItems, updateQuantity } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { t } = useLanguage();
   const wishlisted = isInWishlist(book.id);
@@ -59,12 +59,20 @@ export default function BookCard({ book }) {
       </Link>
 
       {/* Add to Cart button */}
-      <button
-        className="btn btn-primary btn-sm book-card-cart-btn"
-        onClick={() => addToCart(book)}
-      >
-        🛒 {t.addToCart}
-      </button>
+      {isInCart ? (
+        <div className="book-card-qty-selector">
+          <button className="qty-btn" onClick={() => updateQuantity(book.id, -1)}>−</button>
+          <span className="qty-value">{isInCart.quantity}</span>
+          <button className="qty-btn" onClick={() => updateQuantity(book.id, 1)}>+</button>
+        </div>
+      ) : (
+        <button
+          className="btn btn-primary btn-sm book-card-cart-btn"
+          onClick={() => addToCart(book)}
+        >
+          🛒 {t.addToCart}
+        </button>
+      )}
     </div>
   );
 }
