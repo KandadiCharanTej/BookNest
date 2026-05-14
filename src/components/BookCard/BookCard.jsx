@@ -62,9 +62,8 @@ export default function BookCard({ book }) {
       <button
         className="btn btn-primary btn-sm book-card-cart-btn"
         onClick={() => addToCart(book)}
-        disabled={isInCart}
       >
-        {isInCart ? `✓ ${t.inCart}` : `🛒 ${t.addToCart}`}
+        🛒 {t.addToCart}
       </button>
     </div>
   );
