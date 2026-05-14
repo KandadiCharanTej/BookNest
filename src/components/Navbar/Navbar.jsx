@@ -97,7 +97,9 @@ export default function Navbar() {
                   </div>
 
                   <div className="dropdown-divider"></div>
-                  <button className="dropdown-item logout-item" onClick={() => { logout(); setDropdownOpen(false); }}>{t.logout}</button>
+                  <button className="dropdown-item logout-item" onClick={() => { logout(); setDropdownOpen(false); }}>
+                    <span>🚪 {t.logout}</span>
+                  </button>
                 </div>
               )}
             </div>

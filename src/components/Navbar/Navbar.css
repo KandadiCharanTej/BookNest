@@ -397,9 +397,26 @@
   .profile-dropdown {
     position: static;
     width: 100%;
-    margin-top: 10px;
-    background: rgba(255, 255, 255, 0.03);
+    margin-top: 12px;
+    background: rgba(128, 128, 128, 0.05);
     box-shadow: none;
     animation: none;
+    border: 1px solid var(--border-color);
+  }
+
+  .dropdown-header {
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .dropdown-item {
+    justify-content: center;
+    padding: 14px;
+    font-size: 1rem;
+  }
+
+  .setting-item {
+    padding: 12px 24px;
+    font-size: 0.9rem;
   }
 }
