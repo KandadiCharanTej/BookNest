@@ -29,6 +29,11 @@ export default function Home() {
     loadRecommended();
   }, []);
 
+  const retryRecommended = () => {
+    localStorage.removeItem('booknest_genres'); // Clear potential bad data
+    window.location.reload();
+  };
+
   return (
     <main className="home-page">
       {/* Hero Section */}
@@ -47,7 +52,12 @@ export default function Home() {
         {/* Recommended For You - Dynamic API Data */}
         <section className="section" id="recommended">
           <h2 className="section-title">⭐ Recommended For You</h2>
-          {error && <div className="error-msg">{error}</div>}
+          {error && (
+            <div className="error-container">
+              <div className="error-msg">{error}</div>
+              <button className="btn btn-secondary btn-sm" onClick={retryRecommended}>🔄 Retry</button>
+            </div>
+          )}
           {loading ? (
             <Loader />
           ) : (

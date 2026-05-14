@@ -30,6 +30,8 @@ export default function Categories() {
     setLoading(false);
   };
 
+  const retryLoad = () => window.location.reload();
+
   return (
     <main className="categories-page container" id="categories-page">
       <div className="categories-header">
@@ -41,7 +43,12 @@ export default function Categories() {
       <CategoryBar active={activeCategory} onSelect={handleCategorySelect} />
 
       {/* Results */}
-      {error && <div className="error-msg">{error}</div>}
+      {error && (
+        <div className="error-container">
+          <div className="error-msg">{error}</div>
+          <button className="btn btn-secondary" onClick={retryLoad}>🔄 Retry</button>
+        </div>
+      )}
 
       {loading ? (
         <Loader />

@@ -26,6 +26,8 @@ export default function Trending() {
     loadTrending();
   }, []);
 
+  const retryLoad = () => window.location.reload();
+
   return (
     <main className="trending-page container" id="trending-page">
       <div className="trending-header">
@@ -33,7 +35,12 @@ export default function Trending() {
         <p className="page-subtitle">Discover what everyone is reading right now</p>
       </div>
 
-      {error && <div className="error-msg">{error}</div>}
+      {error && (
+        <div className="error-container">
+          <div className="error-msg">{error}</div>
+          <button className="btn btn-secondary" onClick={retryLoad}>🔄 Retry</button>
+        </div>
+      )}
 
       {loading ? (
         <Loader />

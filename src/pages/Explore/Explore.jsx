@@ -17,20 +17,26 @@ export default function Explore() {
 
   // Fetch books when search query changes
   useEffect(() => {
+    setQuery(searchQuery); // Keep input in sync with URL
+    
     const loadBooks = async () => {
       setLoading(true);
       setError(null);
       try {
         const searchTerm = searchQuery || 'bestselling books';
         const results = await searchBooks(searchTerm, 20);
-        setBooks(results);
+        setBooks(results || []);
       } catch {
-        setError('Failed to load books. Please try again.');
+        setError('Failed to load books. Please check your connection.');
       }
       setLoading(false);
     };
     loadBooks();
   }, [searchQuery]);
+
+  const retryLoad = () => {
+    window.location.reload();
+  };
 
   const navigate = useNavigate();
 
@@ -69,7 +75,12 @@ export default function Explore() {
       </div>
 
       {/* Results */}
-      {error && <div className="error-msg">{error}</div>}
+      {error && (
+        <div className="error-container">
+          <div className="error-msg">{error}</div>
+          <button className="btn btn-secondary" onClick={retryLoad}>🔄 Retry</button>
+        </div>
+      )}
 
       {loading ? (
         <Loader />

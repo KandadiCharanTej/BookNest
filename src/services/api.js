@@ -13,13 +13,19 @@ const cache = {
 export async function searchBooks(query, maxResults = 20) {
   if (cache.search[query]) return cache.search[query];
   
-  const res = await fetch(`${BASE_URL}?q=${encodeURIComponent(query)}&maxResults=${maxResults}`);
-  if (!res.ok) throw new Error('Failed to fetch books');
-  const data = await res.json();
-  const results = (data.items || []).map(formatBook);
-  
-  cache.search[query] = results;
-  return results;
+  try {
+    const res = await fetch(`${BASE_URL}?q=${encodeURIComponent(query)}&maxResults=${maxResults}`);
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const data = await res.json();
+    const results = (data.items || []).map(formatBook);
+    
+    cache.search[query] = results;
+    return results;
+  } catch (error) {
+    console.error("Fetch failed for query:", query, error);
+    // Fallback: return a subset of featured books so the UI doesn't look broken
+    return INDIAN_FEATURED_BOOKS.slice(0, maxResults);
+  }
 }
 
 // Fetch a single book by ID
@@ -43,13 +49,18 @@ export async function getBookById(id) {
 export async function getBooksByCategory(category, maxResults = 10) {
   if (cache.categories[category]) return cache.categories[category];
 
-  const res = await fetch(`${BASE_URL}?q=subject:${encodeURIComponent(category)}&maxResults=${maxResults}&orderBy=relevance`);
-  if (!res.ok) throw new Error('Failed to fetch books');
-  const data = await res.json();
-  const results = (data.items || []).map(formatBook);
-  
-  cache.categories[category] = results;
-  return results;
+  try {
+    const res = await fetch(`${BASE_URL}?q=subject:${encodeURIComponent(category)}&maxResults=${maxResults}&orderBy=relevance`);
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const data = await res.json();
+    const results = (data.items || []).map(formatBook);
+    
+    cache.categories[category] = results;
+    return results;
+  } catch (error) {
+    console.error("Category fetch failed:", category, error);
+    return INDIAN_FEATURED_BOOKS.filter(b => b.categories.includes(category)).slice(0, maxResults);
+  }
 }
 
 // Format raw API data into a clean book object
