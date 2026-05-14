@@ -10,6 +10,7 @@ import { useWishlist } from './context/WishlistContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Pages
 import Home from './pages/Home';
@@ -78,7 +79,9 @@ export default function App() {
       <AuthProvider>
         <CartProvider>
           <WishlistProvider>
-            <AppContent />
+            <ErrorBoundary>
+              <AppContent />
+            </ErrorBoundary>
           </WishlistProvider>
         </CartProvider>
       </AuthProvider>

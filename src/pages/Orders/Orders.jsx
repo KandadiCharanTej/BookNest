@@ -4,14 +4,10 @@ import { Link } from 'react-router-dom';
 import './Orders.css';
 
 export default function Orders() {
-  const [orders, setOrders] = useState([]);
-
-  useEffect(() => {
-    // Load all orders from LocalStorage
-    const storedOrders = JSON.parse(localStorage.getItem('booknest_orders') || '[]');
-    // Sort by date (newest first)
-    setOrders(storedOrders.reverse());
-  }, []);
+  const [orders] = useState(() => {
+    const stored = JSON.parse(localStorage.getItem('booknest_orders') || '[]');
+    return [...stored].reverse();
+  });
 
   if (orders.length === 0) {
     return (

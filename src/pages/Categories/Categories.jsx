@@ -24,7 +24,7 @@ export default function Categories() {
     try {
       const results = await getBooksByCategory(cat, 12);
       setBooks(results);
-    } catch (err) {
+    } catch {
       setError('Failed to load category books.');
     }
     setLoading(false);

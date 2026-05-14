@@ -1,6 +1,6 @@
 // Explore Page - Search and browse all books
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import BookCard from '../../components/BookCard';
 import Loader from '../../components/Loader';
 import { searchBooks } from '../../services/api';
@@ -24,7 +24,7 @@ export default function Explore() {
         const searchTerm = searchQuery || 'bestselling books';
         const results = await searchBooks(searchTerm, 20);
         setBooks(results);
-      } catch (err) {
+      } catch {
         setError('Failed to load books. Please try again.');
       }
       setLoading(false);
@@ -32,11 +32,13 @@ export default function Explore() {
     loadBooks();
   }, [searchQuery]);
 
+  const navigate = useNavigate();
+
   // Handle search form submit
   const handleSearch = (e) => {
     e.preventDefault();
     if (query.trim()) {
-      window.location.href = `/explore?search=${encodeURIComponent(query.trim())}`;
+      navigate(`/explore?search=${encodeURIComponent(query.trim())}`);
     }
   };
 

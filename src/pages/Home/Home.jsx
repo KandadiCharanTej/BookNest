@@ -21,7 +21,7 @@ export default function Home() {
         const query = genres.length > 0 ? genres[genres.length - 1] : 'indian bestseller';
         const results = await searchBooks(query, 8);
         setRecommended(results);
-      } catch (err) {
+      } catch {
         setError('Could not load recommendations. Please try again.');
       }
       setLoading(false);

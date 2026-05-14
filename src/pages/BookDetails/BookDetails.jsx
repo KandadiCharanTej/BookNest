@@ -55,7 +55,7 @@ export default function BookDetails() {
             setSimilar(simBooks.filter((b) => b.id !== id));
           }
         }
-      } catch (err) {
+      } catch {
         setError('Failed to load book details. Please try again.');
       }
       setLoading(false);
