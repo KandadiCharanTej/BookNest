@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import PaymentModal from '../../components/PaymentModal';
 import './Cart.css';
 
@@ -11,6 +12,7 @@ const PLACEHOLDER = 'https://via.placeholder.com/80x120/1E293B/F97316?text=Book'
 export default function Cart() {
   const { cartItems, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,9 +40,9 @@ export default function Cart() {
       <main className="cart-page container">
         <div className="empty-state">
           <p className="empty-state-icon">🛒</p>
-          <h3>Your cart is empty</h3>
+          <h3>{t.emptyCart}</h3>
           <p>Discover amazing books and add them to your cart</p>
-          <Link to="/explore" className="btn btn-primary">Browse Books</Link>
+          <Link to="/explore" className="btn btn-primary">{t.exploreBtn}</Link>
         </div>
       </main>
     );
@@ -48,7 +50,7 @@ export default function Cart() {
 
   return (
     <main className="cart-page container" id="cart-page">
-      <h1 className="page-title">🛒 Shopping Cart</h1>
+      <h1 className="page-title">{t.cartTitle}</h1>
 
       {error && <div className="error-msg" style={{ marginBottom: '20px' }}>{error}</div>}
 
@@ -76,7 +78,7 @@ export default function Cart() {
                   <button className="qty-btn" onClick={() => updateQuantity(item.id, 1)}>+</button>
                 </div>
                 <p className="cart-item-subtotal">₹{item.price * item.quantity}</p>
-                <button className="btn btn-danger btn-sm" onClick={() => removeFromCart(item.id)}>Remove</button>
+                <button className="btn btn-danger btn-sm" onClick={() => removeFromCart(item.id)}>{t.remove}</button>
               </div>
             </div>
           ))}
@@ -84,22 +86,22 @@ export default function Cart() {
 
         {/* Order Summary Panel */}
         <div className="cart-summary glass-card" id="order-summary">
-          <h3 className="summary-title">Order Summary</h3>
+          <h3 className="summary-title">{t.details}</h3>
           <div className="summary-row">
-            <span>Items</span>
+            <span>{t.items}</span>
             <span>{cartItems.reduce((sum, item) => sum + item.quantity, 0)}</span>
           </div>
           <div className="summary-row">
-            <span>Subtotal</span>
+            <span>{t.subtotal}</span>
             <span>₹{cartTotal}</span>
           </div>
           <div className="summary-row">
-            <span>Shipping</span>
+            <span>{t.delivery}</span>
             <span className="free-shipping">FREE</span>
           </div>
           <div className="summary-divider"></div>
           <div className="summary-row summary-total">
-            <span>Total</span>
+            <span>{t.total}</span>
             <span>₹{cartTotal}</span>
           </div>
           <button 

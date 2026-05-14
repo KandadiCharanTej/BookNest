@@ -5,11 +5,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useLanguage } from '../../context/LanguageContext';
 import './PaymentModal.css';
 
 export default function PaymentModal({ isOpen, onClose }) {
   const { user } = useAuth();
   const { cartItems, cartTotal, clearCart } = useCart();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   // Payment flow states
@@ -91,15 +93,15 @@ export default function PaymentModal({ isOpen, onClose }) {
         {step === 'select' && (
           <>
             <div className="modal-header">
-              <h2 className="modal-title">💳 Checkout</h2>
+              <h2 className="modal-title">💳 {t.paymentTitle}</h2>
               <button className="modal-close" onClick={handleClose}>✕</button>
             </div>
 
             {/* Delivery Address Preview */}
             <div className="modal-delivery-box">
               <div className="delivery-header">
-                <h3>📍 Deliver To:</h3>
-                <button className="btn-link" onClick={() => navigate('/profile')}>Change</button>
+                <h3>📍 {t.deliverTo}:</h3>
+                <button className="btn-link" onClick={() => navigate('/profile')}>{t.change}</button>
               </div>
               <div className="delivery-info">
                 <p><strong>{user?.address?.fullName}</strong></p>
@@ -111,16 +113,16 @@ export default function PaymentModal({ isOpen, onClose }) {
 
             {/* Order Summary */}
             <div className="modal-summary">
-              <h3>Order Summary</h3>
+              <h3>{t.details}</h3>
               <div className="summary-total-row">
-                <span>Paying Amount</span>
+                <span>{t.payAmount}</span>
                 <span className="summary-total-amount">₹{cartTotal}</span>
               </div>
             </div>
 
             {/* Payment Methods */}
             <div className="modal-methods">
-              <h3>Select Payment Method</h3>
+              <h3>{t.selectMethod}</h3>
               <div className="method-list">
                 {paymentMethods.map((pm) => (
                   <button
@@ -188,8 +190,8 @@ export default function PaymentModal({ isOpen, onClose }) {
             <div className="processing-spinner">
               <div className="spinner-ring"></div>
             </div>
-            <h3>Processing Payment...</h3>
-            <p>Please wait while we confirm your order</p>
+            <h3>{t.processing}</h3>
+            <p>{t.waitMsg}</p>
           </div>
         )}
 
@@ -197,20 +199,20 @@ export default function PaymentModal({ isOpen, onClose }) {
         {step === 'success' && (
           <div className="modal-success">
             <div className="success-icon">✅</div>
-            <h2>Payment Successful!</h2>
-            <p className="success-subtitle">Order ID: {orderId}</p>
+            <h2>{t.paySuccess}</h2>
+            <p className="success-subtitle">{t.orderId}: {orderId}</p>
             <div className="success-details">
               <div className="success-row">
                 <span>Status</span>
                 <span className="success-value">Confirmed</span>
               </div>
               <div className="success-row">
-                <span>Estimated Delivery</span>
+                <span>{t.estDelivery}</span>
                 <span className="success-value">3-4 Business Days</span>
               </div>
             </div>
             <button className="btn btn-primary modal-pay-btn" onClick={handleDone}>
-              🎉 View Order Summary
+              🎉 {t.viewSummary}
             </button>
           </div>
         )}

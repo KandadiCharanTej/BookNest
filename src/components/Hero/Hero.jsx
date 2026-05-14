@@ -20,10 +20,10 @@ export default function Hero() {
           </p>
           <div className="hero-actions">
             <Link to="/explore" className="btn btn-primary btn-lg">
-              📚 {t.exploreButton}
+              📚 {t.exploreBtn}
             </Link>
             <Link to="/trending" className="btn btn-secondary btn-lg">
-              🔥 Trending Now
+              🔥 {t.trendingBtn}
             </Link>
           </div>
           <div className="hero-stats">

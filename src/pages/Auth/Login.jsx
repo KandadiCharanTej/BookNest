@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import './Auth.css';
 
 export default function Login() {
   const { login, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   
   if (isAuthenticated) {
@@ -22,10 +24,12 @@ export default function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
+    
     if (!form.email || !form.password) {
       setError('Please fill in all fields');
       return;
     }
+
     const result = login(form.email, form.password);
     if (result.success) {
       navigate('/');
@@ -35,59 +39,47 @@ export default function Login() {
   };
 
   return (
-    <main className="auth-page" id="login-page">
-      <div className="auth-split">
-        <div className="auth-visual">
-          <div className="auth-visual-content">
-            <span className="auth-visual-icon">📖</span>
-            <h2>Welcome Back<br />to BookNest</h2>
-            <p>"A reader lives a thousand lives before he dies. The man who never reads lives only one."</p>
-            <span className="auth-visual-author">— George R.R. Martin</span>
-          </div>
-          <div className="auth-visual-glow"></div>
+    <main className="auth-page container">
+      <div className="auth-card glass-card">
+        <div className="auth-header">
+          <h1>{t.welcomeBack}</h1>
+          <p>{t.loginSubtitle}</p>
         </div>
 
-        <div className="auth-form-side">
-          <form className="auth-form" onSubmit={handleSubmit}>
-            <h1 className="auth-title">Sign In</h1>
-            <p className="auth-subtitle">Welcome back! Login to continue reading</p>
+        {error && <div className="error-msg">{error}</div>}
 
-            {error && <div className="auth-error">{error}</div>}
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label>{t.email}</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="name@example.com"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="login-email">Email</label>
-              <input
-                type="email"
-                id="login-email"
-                name="email"
-                className="form-input"
-                placeholder="you@example.com"
-                value={form.email}
-                onChange={handleChange}
-              />
-            </div>
+          <div className="form-group">
+            <label>{t.password}</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="login-password">Password</label>
-              <input
-                type="password"
-                id="login-password"
-                name="password"
-                className="form-input"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={handleChange}
-              />
-            </div>
+          <button type="submit" className="btn btn-primary auth-btn">
+            {t.login}
+          </button>
+        </form>
 
-            <button type="submit" className="btn btn-primary auth-submit-btn" id="login-submit">
-              Login
-            </button>
-
-            <p className="auth-switch">
-              Don't have an account? <Link to="/signup">Create one</Link>
-            </p>
-          </form>
+        <div className="auth-footer">
+          <p>{t.noAccount} <Link to="/signup">{t.createAccount}</Link></p>
         </div>
       </div>
     </main>

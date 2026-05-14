@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import './Auth.css';
 
 export default function Signup() {
   const { signup, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   if (isAuthenticated) {
@@ -22,18 +24,12 @@ export default function Signup() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
-    if (!form.name || !form.email || !form.password || !form.confirm) {
-      setError('Please fill in all fields');
-      return;
-    }
-    if (form.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
+
     if (form.password !== form.confirm) {
       setError('Passwords do not match');
       return;
     }
+
     const result = signup(form.name, form.email, form.password);
     if (result.success) {
       navigate('/');
@@ -43,85 +39,71 @@ export default function Signup() {
   };
 
   return (
-    <main className="auth-page" id="signup-page">
-      <div className="auth-split">
-        <div className="auth-visual">
-          <div className="auth-visual-content">
-            <span className="auth-visual-icon">✨</span>
-            <h2>Join the<br />BookNest Family</h2>
-            <p>"The more that you read, the more things you will know. The more that you learn, the more places you'll go."</p>
-            <span className="auth-visual-author">— Dr. Seuss</span>
-          </div>
-          <div className="auth-visual-glow"></div>
+    <main className="auth-page container">
+      <div className="auth-card glass-card">
+        <div className="auth-header">
+          <h1>{t.createAccount}</h1>
+          <p>{t.signupSubtitle}</p>
         </div>
 
-        <div className="auth-form-side">
-          <form className="auth-form" onSubmit={handleSubmit}>
-            <h1 className="auth-title">Create Account</h1>
-            <p className="auth-subtitle">Start your reading journey today</p>
+        {error && <div className="error-msg">{error}</div>}
 
-            {error && <div className="auth-error">{error}</div>}
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label>{t.fullName}</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="John Doe"
+              value={form.name}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="signup-name">Full Name</label>
-              <input
-                type="text"
-                id="signup-name"
-                name="name"
-                className="form-input"
-                placeholder="John Doe"
-                value={form.name}
-                onChange={handleChange}
-              />
-            </div>
+          <div className="form-group">
+            <label>{t.email}</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="name@example.com"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="signup-email">Email</label>
-              <input
-                type="email"
-                id="signup-email"
-                name="email"
-                className="form-input"
-                placeholder="you@example.com"
-                value={form.email}
-                onChange={handleChange}
-              />
-            </div>
+          <div className="form-group">
+            <label>{t.password}</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="signup-password">Password</label>
-              <input
-                type="password"
-                id="signup-password"
-                name="password"
-                className="form-input"
-                placeholder="Min 6 characters"
-                value={form.password}
-                onChange={handleChange}
-              />
-            </div>
+          <div className="form-group">
+            <label>{t.confirmPassword}</label>
+            <input
+              type="password"
+              name="confirm"
+              placeholder="••••••••"
+              value={form.confirm}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="signup-confirm">Confirm Password</label>
-              <input
-                type="password"
-                id="signup-confirm"
-                name="confirm"
-                className="form-input"
-                placeholder="••••••••"
-                value={form.confirm}
-                onChange={handleChange}
-              />
-            </div>
+          <button type="submit" className="btn btn-primary auth-btn">
+            {t.signup}
+          </button>
+        </form>
 
-            <button type="submit" className="btn btn-primary auth-submit-btn" id="signup-submit">
-              Create Account
-            </button>
-
-            <p className="auth-switch">
-              Already have an account? <Link to="/login">Sign In</Link>
-            </p>
-          </form>
+        <div className="auth-footer">
+          <p>{t.alreadyAccount} <Link to="/login">{t.login}</Link></p>
         </div>
       </div>
     </main>

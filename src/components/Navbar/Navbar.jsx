@@ -44,9 +44,8 @@ export default function Navbar() {
     <nav className="navbar" id="main-navbar">
       <div className="navbar-inner container">
         {/* Logo */}
-        <Link to="/" className="navbar-logo" id="nav-logo">
-          <span className="logo-icon">📚</span>
-          <span className="logo-text">Smart <span className="logo-accent">BookNest</span></span>
+        <Link to="/" className="navbar-logo">
+          Smart <span className="logo-accent">BookNest</span>
         </Link>
 
         {/* Search Bar */}
@@ -76,10 +75,11 @@ export default function Navbar() {
               className="lang-select" 
               value={lang} 
               onChange={(e) => changeLanguage(e.target.value)}
+              aria-label="Select Language"
             >
               <option value="en">EN</option>
-              <option value="hi">HI</option>
-              <option value="te">TE</option>
+              <option value="hi">हिन्दी</option>
+              <option value="te">తెలుగు</option>
             </select>
           </div>
 
