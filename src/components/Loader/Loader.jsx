@@ -1,12 +1,14 @@
+import './Loader.css';
+
 export default function Loader() {
   return (
-    <div className="loader-container" id="loader">
-      <div className="loader-dots">
-        <span></span>
-        <span></span>
-        <span></span>
+    <div className="loader-container">
+      <div className="beat-loader">
+        <div className="dot"></div>
+        <div className="dot"></div>
+        <div className="dot"></div>
       </div>
-      <p className="loader-text">Loading books...</p>
+      <p className="loader-text">Finding your next favorite book...</p>
     </div>
   );
 }

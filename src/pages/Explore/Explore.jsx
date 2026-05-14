@@ -8,7 +8,7 @@ import { searchBooks } from '../../services/api';
 import './Explore.css';
 
 export default function Explore() {
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
 
@@ -25,8 +25,9 @@ export default function Explore() {
       setLoading(true);
       setError(null);
       try {
-        const searchTerm = searchQuery || 'bestselling books';
-        const results = await searchBooks(searchTerm, 20);
+        const searchTerm = searchQuery || 'trending bestsellers';
+        // Fetch 40 books (max per request)
+        const results = await searchBooks(searchTerm, 40, lang);
         setBooks(results || []);
       } catch {
         setError('Failed to load books. Please check your connection.');
@@ -34,7 +35,7 @@ export default function Explore() {
       setLoading(false);
     };
     loadBooks();
-  }, [searchQuery]);
+  }, [searchQuery, lang]);
 
   const retryLoad = () => {
     window.location.reload();

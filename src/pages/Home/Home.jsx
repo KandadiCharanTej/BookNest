@@ -8,7 +8,7 @@ import { INDIAN_FEATURED_BOOKS, searchBooks } from '../../services/api';
 import './Home.css';
 
 export default function Home() {
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
   const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,8 +20,9 @@ export default function Home() {
       try {
         // Check if user has browsed any genres before
         const genres = JSON.parse(localStorage.getItem('booknest_genres') || '[]');
-        const query = genres.length > 0 ? genres[genres.length - 1] : 'indian bestseller';
-        const results = await searchBooks(query, 8);
+        const query = genres.length > 0 ? genres[genres.length - 1] : 'indian bestsellers';
+        // Fetch 40 books for a massive collection
+        const results = await searchBooks(query, 40, lang);
         setRecommended(results);
       } catch {
         setError('Could not load recommendations. Please try again.');
@@ -29,7 +30,7 @@ export default function Home() {
       setLoading(false);
     };
     loadRecommended();
-  }, []);
+  }, [lang]);
 
   const retryRecommended = () => {
     localStorage.removeItem('booknest_genres'); // Clear potential bad data
@@ -46,7 +47,7 @@ export default function Home() {
         <section className="section" id="featured-indian">
           <h2 className="section-title">✨ {t.featuredTitle}</h2>
           <div className="books-grid">
-            {INDIAN_FEATURED_BOOKS.slice(0, 8).map((book) => (
+            {INDIAN_FEATURED_BOOKS.map((book) => (
               <BookCard key={book.id} book={book} />
             ))}
           </div>

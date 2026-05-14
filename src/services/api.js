@@ -9,53 +9,58 @@ const cache = {
   categories: {}
 };
 
-// Fetch books by search query
-export async function searchBooks(query, maxResults = 20) {
-  if (cache.search[query]) return cache.search[query];
+// Fetch books by search query with language support
+export async function searchBooks(query, maxResults = 40, lang = 'en') {
+  const cacheKey = `${query}_${lang}`;
+  if (cache.search[cacheKey]) return cache.search[cacheKey];
   
   try {
-    const res = await fetch(`${BASE_URL}?q=${encodeURIComponent(query)}&maxResults=${maxResults}`);
+    const res = await fetch(`${BASE_URL}?q=${encodeURIComponent(query)}&maxResults=${maxResults}&langRestrict=${lang}`);
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     const data = await res.json();
     const results = (data.items || []).map(formatBook);
     
-    cache.search[query] = results;
+    cache.search[cacheKey] = results;
     return results;
   } catch (error) {
     console.error("Fetch failed for query:", query, error);
-    // Fallback: return a subset of featured books so the UI doesn't look broken
     return INDIAN_FEATURED_BOOKS.slice(0, maxResults);
   }
 }
 
 // Fetch a single book by ID
 export async function getBookById(id) {
-  // Check static Indian books first (instant)
+  // Check static Indian books first
   const staticBook = INDIAN_FEATURED_BOOKS.find(b => b.id === id);
   if (staticBook) return staticBook;
 
   if (cache.details[id]) return cache.details[id];
 
-  const res = await fetch(`${BASE_URL}/${id}`);
-  if (!res.ok) throw new Error('Failed to fetch book details');
-  const data = await res.json();
-  const book = formatBook(data);
-  
-  cache.details[id] = book;
-  return book;
+  try {
+    const res = await fetch(`${BASE_URL}/${id}`);
+    if (!res.ok) throw new Error('Failed to fetch book details');
+    const data = await res.json();
+    const book = formatBook(data);
+    
+    cache.details[id] = book;
+    return book;
+  } catch (error) {
+    return null;
+  }
 }
 
-// Fetch books by category/genre
-export async function getBooksByCategory(category, maxResults = 10) {
-  if (cache.categories[category]) return cache.categories[category];
+// Fetch books by category/genre with language support
+export async function getBooksByCategory(category, maxResults = 40, lang = 'en') {
+  const cacheKey = `${category}_${lang}`;
+  if (cache.categories[cacheKey]) return cache.categories[cacheKey];
 
   try {
-    const res = await fetch(`${BASE_URL}?q=subject:${encodeURIComponent(category)}&maxResults=${maxResults}&orderBy=relevance`);
+    const res = await fetch(`${BASE_URL}?q=subject:${encodeURIComponent(category)}&maxResults=${maxResults}&orderBy=relevance&langRestrict=${lang}`);
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     const data = await res.json();
     const results = (data.items || []).map(formatBook);
     
-    cache.categories[category] = results;
+    cache.categories[cacheKey] = results;
     return results;
   } catch (error) {
     console.error("Category fetch failed:", category, error);
