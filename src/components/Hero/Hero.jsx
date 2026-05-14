@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../../context/LanguageContext';
 import './Hero.css';
 
 export default function Hero() {
+  const { t } = useLanguage();
   return (
     <section className="hero" id="hero-section">
       <div className="hero-bg-glow"></div>
@@ -10,15 +12,15 @@ export default function Hero() {
         <div className="hero-content">
           <span className="hero-badge">✨ Your Digital Bookshelf</span>
           <h1 className="hero-title">
-            Find Your Next<br />
-            <span className="hero-accent">Favorite Book</span>
+            {t.heroTitle} <br />
+            <span className="hero-accent">{t.heroAccent}</span>
           </h1>
           <p className="hero-subtitle">
-            From Wings of Fire to Shiva Trilogy — discover thousands of books from the best authors. Your next great read is just a click away.
+            {t.heroSubtitle}
           </p>
           <div className="hero-actions">
             <Link to="/explore" className="btn btn-primary btn-lg">
-              📚 Explore Books
+              📚 {t.exploreButton}
             </Link>
             <Link to="/trending" className="btn btn-secondary btn-lg">
               🔥 Trending Now

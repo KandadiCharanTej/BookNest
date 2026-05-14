@@ -3,10 +3,12 @@ import { useState, useEffect } from 'react';
 import Hero from '../../components/Hero';
 import BookCard from '../../components/BookCard';
 import Loader from '../../components/Loader';
+import { useLanguage } from '../../context/LanguageContext';
 import { INDIAN_FEATURED_BOOKS, searchBooks } from '../../services/api';
 import './Home.css';
 
 export default function Home() {
+  const { t } = useLanguage();
   const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -40,8 +42,9 @@ export default function Home() {
       <Hero />
 
       <div className="container">
+        {/* Featured Indian Books - Static Data */}
         <section className="section" id="featured-indian">
-          <h2 className="section-title">✨ Featured Books</h2>
+          <h2 className="section-title">✨ {t.featuredTitle}</h2>
           <div className="books-grid">
             {INDIAN_FEATURED_BOOKS.slice(0, 8).map((book) => (
               <BookCard key={book.id} book={book} />
@@ -51,7 +54,7 @@ export default function Home() {
 
         {/* Recommended For You - Dynamic API Data */}
         <section className="section" id="recommended">
-          <h2 className="section-title">⭐ Recommended For You</h2>
+          <h2 className="section-title">⭐ {t.recommendedTitle}</h2>
           {error && (
             <div className="error-container">
               <div className="error-msg">{error}</div>

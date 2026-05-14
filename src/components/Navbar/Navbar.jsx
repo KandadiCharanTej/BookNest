@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { useEffect, useRef } from 'react';
 import './Navbar.css';
 
@@ -13,6 +15,9 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+  
+  const { isDarkMode, toggleTheme } = useTheme();
+  const { lang, changeLanguage, t } = useLanguage();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -45,26 +50,41 @@ export default function Navbar() {
         </Link>
 
         {/* Search Bar */}
-        <form className="navbar-search" onSubmit={handleSearch} id="nav-search-form">
+        <form className="navbar-search" onSubmit={handleSearch}>
           <span className="search-icon">🔍</span>
           <input
             type="text"
-            placeholder="Search books..."
+            className="search-input"
+            placeholder={t.searchPlaceholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="search-input"
-            id="nav-search-input"
           />
         </form>
 
-        {/* Navigation Links */}
         <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>
-          <NavLink to="/" className="nav-link" onClick={() => setMenuOpen(false)}>Home</NavLink>
-          <NavLink to="/explore" className="nav-link" onClick={() => setMenuOpen(false)}>Explore</NavLink>
-          <NavLink to="/trending" className="nav-link" onClick={() => setMenuOpen(false)}>Trending</NavLink>
+          <NavLink to="/" className="nav-link" onClick={() => setMenuOpen(false)}>{t.home}</NavLink>
+          <NavLink to="/explore" className="nav-link" onClick={() => setMenuOpen(false)}>{t.explore}</NavLink>
+          <NavLink to="/trending" className="nav-link" onClick={() => setMenuOpen(false)}>{t.trending}</NavLink>
+          <NavLink to="/categories" className="nav-link" onClick={() => setMenuOpen(false)}>{t.categories}</NavLink>
           
-          <NavLink to="/cart" className="nav-link cart-link" id="nav-cart" onClick={() => setMenuOpen(false)}>
-            🛒 Cart
+          <div className="nav-controls">
+            <button className="control-btn theme-toggle" onClick={toggleTheme} title="Toggle Theme">
+              {isDarkMode ? '☀️' : '🌙'}
+            </button>
+            
+            <select 
+              className="lang-select" 
+              value={lang} 
+              onChange={(e) => changeLanguage(e.target.value)}
+            >
+              <option value="en">EN</option>
+              <option value="hi">HI</option>
+              <option value="te">TE</option>
+            </select>
+          </div>
+
+          <NavLink to="/cart" className="nav-link cart-link" onClick={() => setMenuOpen(false)}>
+            {t.cart}
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </NavLink>
 
@@ -75,23 +95,23 @@ export default function Navbar() {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 <div className="nav-avatar">{user?.name?.charAt(0)}</div>
-                <span className="nav-user-name">Hi, {user?.name?.split(' ')[0]}</span>
+                <span className="nav-user-name">{t.hi}, {user?.name?.split(' ')[0]}</span>
                 <span className="dropdown-arrow">▼</span>
               </button>
 
               {dropdownOpen && (
                 <div className="profile-dropdown glass-card">
-                  <Link to="/profile" className="dropdown-item" onClick={() => setDropdownOpen(false)}>👤 My Profile</Link>
-                  <Link to="/orders" className="dropdown-item" onClick={() => setDropdownOpen(false)}>📦 My Orders</Link>
-                  <Link to="/wishlist" className="dropdown-item" onClick={() => setDropdownOpen(false)}>♥ Wishlist</Link>
+                  <Link to="/profile" className="dropdown-item" onClick={() => setDropdownOpen(false)}>👤 {t.profile}</Link>
+                  <Link to="/orders" className="dropdown-item" onClick={() => setDropdownOpen(false)}>📦 {t.orders}</Link>
+                  <Link to="/wishlist" className="dropdown-item" onClick={() => setDropdownOpen(false)}>♥ {t.wishlist}</Link>
                   <div className="dropdown-divider"></div>
-                  <button className="dropdown-item logout-item" onClick={() => { logout(); setDropdownOpen(false); }}>Logout</button>
+                  <button className="dropdown-item logout-item" onClick={() => { logout(); setDropdownOpen(false); }}>{t.logout}</button>
                 </div>
               )}
             </div>
           ) : (
             <Link to="/login" className="btn btn-sm btn-primary" onClick={() => setMenuOpen(false)}>
-              Login
+              {t.login}
             </Link>
           )}
         </div>

@@ -1,18 +1,21 @@
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
+import { useLanguage } from '../../context/LanguageContext';
 import './BookCard.css';
 
 const PLACEHOLDER = 'https://via.placeholder.com/128x192/1E293B/F97316?text=No+Cover';
 
 export default function BookCard({ book }) {
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { t } = useLanguage();
   const wishlisted = isInWishlist(book.id);
+  const isInCart = cartItems.find((item) => item.id === book.id);
 
   // Render star rating or fallback text
   const renderStars = (rating) => {
-    if (!rating) return <span className="no-rating">No Ratings</span>;
+    if (!rating) return <span className="no-rating">{t.noRatings}</span>;
     const full = Math.floor(rating);
     const half = rating % 1 >= 0.5;
     let stars = '';
@@ -59,8 +62,9 @@ export default function BookCard({ book }) {
       <button
         className="btn btn-primary btn-sm book-card-cart-btn"
         onClick={() => addToCart(book)}
+        disabled={isInCart}
       >
-        🛒 Add to Cart
+        {isInCart ? `✓ ${t.inCart}` : `🛒 ${t.addToCart}`}
       </button>
     </div>
   );
