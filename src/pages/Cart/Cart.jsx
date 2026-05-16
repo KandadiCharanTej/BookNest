@@ -1,47 +1,63 @@
-// Cart Page - Shows items in cart with order summary
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
-import { useLanguage } from '../../context/LanguageContext';
-import PaymentModal from '../../components/PaymentModal';
-import './Cart.css';
+// Importing React hooks and context
+import { useState } from 'react'; // For local state (modal)
+import { Link, useNavigate } from 'react-router-dom'; // For navigation
+import { useCart } from '../../context/CartContext'; // Access cart state and functions
+import { useAuth } from '../../context/AuthContext'; // Access user address info
+import { useLanguage } from '../../context/LanguageContext'; // Access translations
+import PaymentModal from '../../components/PaymentModal'; // Checkout popup
+import './Cart.css'; // Cart page styles
 
-const PLACEHOLDER = 'https://via.placeholder.com/80x120/1E293B/F97316?text=Book';
+// Premium placeholder image for broken images
+const PLACEHOLDER = 'https://images.unsplash.com/photo-1543004218-ee141104975a?q=80&w=200&auto=format&fit=crop';
 
+// Functional component for the Shopping Cart page
 export default function Cart() {
-  const { cartItems, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart();
+  // Destructuring all needed cart data from our custom hook
+  const { 
+    cartItems, 
+    removeFromCart, 
+    increaseQuantity, 
+    decreaseQuantity, 
+    clearCart, 
+    cartTotal, 
+    cartCount 
+  } = useCart();
+  
+  // Accessing user data and language helpers
   const { user } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   
+  // Local state for modal visibility and error messages
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState('');
 
-  // Handle Proceed to Checkout
+  // Function to handle image loading errors
+  const handleImageError = (e) => {
+    e.target.src = PLACEHOLDER;
+    e.target.onerror = null;
+  };
+
+  // Function to handle the checkout button click
   const handleProceed = () => {
-    // Check if address is added in profile
-    const hasAddress = user?.address?.fullName && user?.address?.pincode && user?.address?.city;
-    
-    if (!hasAddress) {
-      setError('Please add a delivery address in your profile before checkout.');
-      setTimeout(() => {
-        navigate('/profile#address-section');
-      }, 2000);
+    // If user hasn't added an address yet, redirect them to profile
+    if (!user?.address?.fullName) {
+      setError('Please add a delivery address in your profile first!');
+      setTimeout(() => navigate('/profile'), 2000);
       return;
     }
-
+    // Otherwise, open the payment popup
     setIsModalOpen(true);
   };
 
-  // Show empty state if cart is empty
+  // Show this view if the cart is empty
   if (cartItems.length === 0) {
     return (
       <main className="cart-page container">
         <div className="empty-state">
           <p className="empty-state-icon">🛒</p>
           <h3>{t.emptyCart}</h3>
-          <p>Discover amazing books and add them to your cart</p>
+          <p>Start browsing our collection to find your next favorite book!</p>
           <Link to="/explore" className="btn btn-primary">{t.exploreBtn}</Link>
         </div>
       </main>
@@ -49,79 +65,96 @@ export default function Cart() {
   }
 
   return (
-    <main className="cart-page container" id="cart-page">
+    <main className="cart-page container">
+      {/* Page Title */}
       <h1 className="page-title">{t.cartTitle}</h1>
+      
+      {/* Error message display if any */}
+      {error && <div className="error-msg">{error}</div>}
 
-      {error && <div className="error-msg" style={{ marginBottom: '20px' }}>{error}</div>}
-
+      {/* Main layout split into Items List and Summary Sidebar */}
       <div className="cart-layout">
-        {/* Cart Items List */}
+        
+        {/* Section 1: Cart Items List */}
         <div className="cart-items">
           {cartItems.map((item) => (
-            <div className="cart-item glass-card" key={item.id} id={`cart-item-${item.id}`}>
-              <img
-                src={item.image || PLACEHOLDER}
-                alt={item.title}
-                className="cart-item-img"
-                onError={(e) => { e.target.src = PLACEHOLDER; }}
+            <div className="cart-item glass-card" key={item.id}>
+              {/* Item Image with error handling */}
+              <img 
+                src={item.image} 
+                alt={item.title} 
+                className="cart-item-img" 
+                onError={handleImageError}
               />
+              
+              {/* Item Info (Title & Unit Price) */}
               <div className="cart-item-info">
                 <Link to={`/book/${item.id}`} className="cart-item-title">{item.title}</Link>
-                <p className="cart-item-author">{item.authors[0]}</p>
                 <p className="cart-item-price">₹{item.price}</p>
               </div>
+              
+              {/* Quantity Controls and Actions */}
               <div className="cart-item-controls">
-                {/* Quantity Controls */}
                 <div className="qty-controls">
-                  <button className="qty-btn" onClick={() => updateQuantity(item.id, -1)}>−</button>
+                  {/* Decrease button: [-] */}
+                  <button className="qty-btn" onClick={() => decreaseQuantity(item.id)}>−</button>
+                  {/* Current quantity display */}
                   <span className="qty-value">{item.quantity}</span>
-                  <button className="qty-btn" onClick={() => updateQuantity(item.id, 1)}>+</button>
+                  {/* Increase button: [+] */}
+                  <button className="qty-btn" onClick={() => increaseQuantity(item.id)}>+</button>
                 </div>
+                
+                {/* Total price for this specific item (Price * Quantity) */}
                 <p className="cart-item-subtotal">₹{item.price * item.quantity}</p>
-                <button className="btn btn-danger btn-sm" onClick={() => removeFromCart(item.id)}>{t.remove}</button>
+                
+                {/* Remove item button */}
+                <button className="btn btn-danger btn-sm" onClick={() => removeFromCart(item.id)}>
+                  {t.remove}
+                </button>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Order Summary Panel */}
-        <div className="cart-summary glass-card" id="order-summary">
+        {/* Section 2: Order Summary Sidebar */}
+        <div className="cart-summary glass-card">
           <h3 className="summary-title">{t.details}</h3>
+          
           <div className="summary-row">
             <span>{t.items}</span>
-            <span>{cartItems.reduce((sum, item) => sum + item.quantity, 0)}</span>
+            <span>{cartCount} items</span>
           </div>
+          
           <div className="summary-row">
             <span>{t.subtotal}</span>
             <span>₹{cartTotal}</span>
           </div>
+          
           <div className="summary-row">
-            <span>{t.delivery}</span>
+            <span>Delivery</span>
             <span className="free-shipping">FREE</span>
           </div>
+          
           <div className="summary-divider"></div>
+          
           <div className="summary-row summary-total">
             <span>{t.total}</span>
             <span>₹{cartTotal}</span>
           </div>
-          <button 
-            className="btn btn-primary checkout-btn" 
-            id="checkout-btn"
-            onClick={handleProceed}
-          >
+          
+          {/* Action Buttons */}
+          <button className="btn btn-primary checkout-btn" onClick={handleProceed}>
             {t.checkout}
           </button>
+          
           <button className="btn btn-ghost clear-btn" onClick={clearCart}>
-            Clear Cart
+            Clear Entire Cart
           </button>
         </div>
       </div>
 
-      {/* Payment Modal Popup */}
-      <PaymentModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-      />
+      {/* Checkout/Payment Popup */}
+      <PaymentModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </main>
   );
 }

@@ -1,4 +1,4 @@
-import { CATEGORIES } from '../../services/api';
+import { CATEGORIES } from '../../utils/mockData';
 import './CategoryBar.css';
 
 export default function CategoryBar({ active, onSelect }) {

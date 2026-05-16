@@ -1,103 +1,81 @@
-// PaymentModal - Simulated payment flow for checkout
-// Uses: useState, conditional rendering, setTimeout, LocalStorage
+// Importing React hooks and context
+import { useState } from 'react'; // Hook for managing modal steps and selections
+import { useNavigate } from 'react-router-dom'; // Hook for navigation after payment
+import { useAuth } from '../../context/AuthContext'; // Access user info (like address)
+import { useCart } from '../../context/CartContext'; // Access cart total and clear function
+import { useLanguage } from '../../context/LanguageContext'; // Access translations
+import './PaymentModal.css'; // Specific styling for the modal
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useCart } from '../../context/CartContext';
-import { useLanguage } from '../../context/LanguageContext';
-import './PaymentModal.css';
-
+// Functional component for the Checkout/Payment process
 export default function PaymentModal({ isOpen, onClose }) {
-  const { user } = useAuth();
-  const { cartItems, cartTotal, clearCart } = useCart();
-  const { t } = useLanguage();
-  const navigate = useNavigate();
+  // Accessing values from our global state contexts
+  const { user } = useAuth(); // User profile data
+  const { cartItems, cartTotal, clearCart } = useCart(); // Cart data and clearing function
+  const { t } = useLanguage(); // Translation set
+  const navigate = useNavigate(); // Navigation function
 
-  // Payment flow states
-  const [step, setStep] = useState('select');   // 'select' | 'processing' | 'success'
-  const [method, setMethod] = useState('');       // selected payment method
-  const [orderId, setOrderId] = useState('');      // generated order ID
+  // Local state to manage the flow of the modal
+  const [step, setStep] = useState('select'); // Current step: 'select', 'processing', or 'success'
+  const [method, setMethod] = useState(''); // Stores the user's chosen payment method
 
-  // Payment method options
-  const paymentMethods = [
-    { id: 'upi', label: 'UPI', icon: '📱', desc: 'Google Pay, PhonePe, Paytm' },
-    { id: 'debit', label: 'Debit Card', icon: '💳', desc: 'Visa, Mastercard, RuPay' },
-    { id: 'credit', label: 'Credit Card', icon: '🏦', desc: 'All major cards accepted' },
-    { id: 'cod', label: 'Cash on Delivery', icon: '💵', desc: 'Pay when you receive' },
-  ];
-
-  // Generate a random order ID
-  const generateOrderId = () => {
-    const timestamp = Date.now().toString(36).toUpperCase();
-    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-    return `BN-${timestamp}-${random}`;
-  };
-
-  // Handle "Pay Now" button click
+  // Function to simulate the payment process
   const handlePayment = () => {
-    if (!method) return;
+    if (!method) return; // Don't proceed if no method is chosen
+    setStep('processing'); // Show the loading/processing screen
 
-    // Step 1: Show processing spinner
-    setStep('processing');
-
-    // Step 2: Simulate payment delay using setTimeout
+    // Simulate a 2-second delay for payment authorization
     setTimeout(() => {
-      const newOrderId = generateOrderId();
-      setOrderId(newOrderId);
-
-      // Save order to LocalStorage with Delivery Info
-      const order = {
-        orderId: newOrderId,
-        items: cartItems,
-        total: cartTotal,
-        paymentMethod: method,
-        address: user.address, // Save current delivery address
-        date: new Date().toLocaleDateString('en-IN'),
-        time: new Date().toLocaleTimeString('en-IN'),
+      // Generate a fake random Order ID
+      const orderId = 'ORD' + Math.floor(Math.random() * 1000000);
+      
+      // Create a new order object to save
+      const newOrder = {
+        orderId,
+        items: cartItems, // Books purchased
+        total: cartTotal, // Final amount paid
+        address: user.address, // Delivery location
+        paymentMethod: method, // Payment type
+        date: new Date().toLocaleDateString('en-IN') // Date of purchase
       };
 
-      const orders = JSON.parse(localStorage.getItem('booknest_orders') || '[]');
-      orders.push(order);
-      localStorage.setItem('booknest_orders', JSON.stringify(orders));
-
-      // Step 3: Show success screen
+      // Retrieve existing orders from storage, or start with empty list
+      const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+      
+      // Save the new order along with existing ones
+      localStorage.setItem('orders', JSON.stringify([...existingOrders, newOrder]));
+      
+      // Move to the final success step
       setStep('success');
     }, 2000);
   };
 
-  // Handle closing after success
+  // Function called when the user clicks 'Finish'
   const handleDone = () => {
-    clearCart();
-    onClose();
-    setStep('select');
-    setMethod('');
-    navigate('/order-success');
+    clearCart(); // Remove all items from the cart
+    onClose(); // Close the modal
+    setStep('select'); // Reset step for next time
+    navigate('/order-success'); // Redirect to success page
   };
 
-  // Reset modal when closing without completing
-  const handleClose = () => {
-    if (step === 'processing') return; // Don't close during processing
-    onClose();
-    setStep('select');
-    setMethod('');
-  };
-
+  // If the modal shouldn't be open, return nothing
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={handleClose} id="payment-modal">
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-
-        {/* ===== STEP 1: Select Payment Method ===== */}
+    // Backdrop overlay that closes the modal when clicked
+    <div className="modal-overlay" onClick={onClose}>
+      {/* Modal box container - stops click propagation */}
+      <div className="modal-content glass-card" onClick={e => e.stopPropagation()}>
+        
+        {/* STEP 1: Selection Phase */}
         {step === 'select' && (
           <>
+            {/* Modal Top section */}
             <div className="modal-header">
               <h2 className="modal-title">💳 {t.paymentTitle}</h2>
-              <button className="modal-close" onClick={handleClose}>✕</button>
+              <button className="modal-close" onClick={onClose}>✕</button>
             </div>
 
-            {/* Delivery Address Preview */}
+            {/* Delivery Location Preview */}
             <div className="modal-delivery-box">
               <div className="delivery-header">
                 <h3>📍 {t.deliverTo}:</h3>
@@ -105,114 +83,84 @@ export default function PaymentModal({ isOpen, onClose }) {
               </div>
               <div className="delivery-info">
                 <p><strong>{user?.address?.fullName}</strong></p>
-                <p>{user?.address?.street}, {user?.address?.area}</p>
-                <p>{user?.address?.city}, {user?.address?.state} - {user?.address?.pincode}</p>
-                <p>Phone: {user?.address?.mobile}</p>
+                <p>{user?.address?.city}, {user?.address?.pincode}</p>
               </div>
             </div>
 
-            {/* Order Summary */}
+            {/* Order Total Preview */}
             <div className="modal-summary">
               <h3>{t.details}</h3>
               <div className="summary-total-row">
-                <span>{t.payAmount}</span>
+                <span>{t.payAmount || 'Amount to Pay'}</span>
                 <span className="summary-total-amount">₹{cartTotal}</span>
               </div>
             </div>
 
-            {/* Payment Methods */}
+            {/* Payment Method Options */}
             <div className="modal-methods">
               <h3>{t.selectMethod}</h3>
               <div className="method-list">
-                {paymentMethods.map((pm) => (
-                  <button
-                    key={pm.id}
-                    className={`method-option ${method === pm.id ? 'active' : ''}`}
-                    onClick={() => setMethod(pm.id)}
-                  >
-                    <span className="method-icon">{pm.icon}</span>
-                    <div className="method-info">
-                      <span className="method-label">{pm.label}</span>
-                      <span className="method-desc">{pm.desc}</span>
-                    </div>
-                  </button>
-                ))}
+                {/* UPI Option */}
+                <button className={`method-option ${method === 'upi' ? 'active' : ''}`} onClick={() => setMethod('upi')}>
+                  <span className="method-icon">📱</span>
+                  <div className="method-info">
+                    <span className="method-label">UPI</span>
+                    <span className="method-desc">GPay, PhonePe, Paytm</span>
+                  </div>
+                </button>
+                
+                {/* Card Option */}
+                <button className={`method-option ${method === 'card' ? 'active' : ''}`} onClick={() => setMethod('card')}>
+                  <span className="method-icon">💳</span>
+                  <div className="method-info">
+                    <span className="method-label">Debit/Credit Card</span>
+                    <span className="method-desc">Visa, Mastercard, RuPay</span>
+                  </div>
+                </button>
+                
+                {/* Cash on Delivery Option */}
+                <button className={`method-option ${method === 'cod' ? 'active' : ''}`} onClick={() => setMethod('cod')}>
+                  <span className="method-icon">💵</span>
+                  <div className="method-info">
+                    <span className="method-label">Cash on Delivery</span>
+                    <span className="method-desc">Pay when you receive</span>
+                  </div>
+                </button>
               </div>
             </div>
 
-            {/* Fake UPI QR Code */}
-            {method === 'upi' && (
-              <div className="upi-qr-section">
-                <p className="qr-label">Scan QR Code to Pay</p>
-                <div className="qr-code-box">
-                  <svg viewBox="0 0 100 100" className="qr-svg">
-                    <rect width="100" height="100" fill="#fff"/>
-                    <rect x="5" y="5" width="25" height="25" fill="#000"/>
-                    <rect x="8" y="8" width="19" height="19" fill="#fff"/>
-                    <rect x="11" y="11" width="13" height="13" fill="#000"/>
-                    <rect x="70" y="5" width="25" height="25" fill="#000"/>
-                    <rect x="73" y="8" width="19" height="19" fill="#fff"/>
-                    <rect x="76" y="11" width="13" height="13" fill="#000"/>
-                    <rect x="5" y="70" width="25" height="25" fill="#000"/>
-                    <rect x="8" y="73" width="19" height="19" fill="#fff"/>
-                    <rect x="11" y="76" width="13" height="13" fill="#000"/>
-                    <rect x="35" y="5" width="5" height="5" fill="#000"/>
-                    <rect x="45" y="5" width="5" height="5" fill="#000"/>
-                    <rect x="55" y="5" width="5" height="5" fill="#000"/>
-                    <rect x="35" y="15" width="5" height="5" fill="#000"/>
-                    <rect x="50" y="15" width="5" height="5" fill="#000"/>
-                    <rect x="35" y="35" width="5" height="5" fill="#000"/>
-                    <rect x="5" y="35" width="5" height="5" fill="#000"/>
-                    <rect x="5" y="45" width="5" height="5" fill="#000"/>
-                    <rect x="35" y="85" width="5" height="5" fill="#000"/>
-                    <rect x="70" y="70" width="25" height="25" fill="#000"/>
-                    <rect x="73" y="73" width="19" height="19" fill="#fff"/>
-                    <rect x="76" y="76" width="13" height="13" fill="#000"/>
-                  </svg>
-                </div>
-                <p className="qr-upi-id">booknest@upi</p>
-              </div>
-            )}
-
-            <button
-              className={`btn btn-primary modal-pay-btn ${!method ? 'disabled' : ''}`}
-              onClick={handlePayment}
-              disabled={!method}
-            >
-              {method === 'cod' ? '✓ Place Order (COD)' : `💳 Pay ₹${cartTotal}`}
+            {/* Final Payment Button */}
+            <button className={`btn btn-primary modal-pay-btn ${!method ? 'disabled' : ''}`} onClick={handlePayment} disabled={!method}>
+              {method === 'cod' ? '✓ Place Order' : `💳 Pay ₹${cartTotal}`}
             </button>
           </>
         )}
 
-        {/* ===== STEP 2: Processing ===== */}
+        {/* STEP 2: Processing Spinner */}
         {step === 'processing' && (
           <div className="modal-processing">
             <div className="processing-spinner">
               <div className="spinner-ring"></div>
             </div>
-            <h3>{t.processing}</h3>
-            <p>{t.waitMsg}</p>
+            <h3>{t.processing || 'Processing Payment...'}</h3>
+            <p>{t.waitMsg || 'Please wait while we confirm your order'}</p>
           </div>
         )}
 
-        {/* ===== STEP 3: Success ===== */}
+        {/* STEP 3: Success Screen */}
         {step === 'success' && (
           <div className="modal-success">
             <div className="success-icon">✅</div>
-            <h2>{t.paySuccess}</h2>
-            <p className="success-subtitle">{t.orderId}: {orderId}</p>
+            <h2>{t.paySuccess || 'Payment Successful!'}</h2>
             <div className="success-details">
               <div className="success-row">
                 <span>Status</span>
                 <span className="success-value">Confirmed</span>
               </div>
-              <div className="success-row">
-                <span>{t.estDelivery}</span>
-                <span className="success-value">3-4 Business Days</span>
-              </div>
             </div>
+            {/* REMOVED VIEW SUMMARY AS REQUESTED - CHANGED TO FINISH */}
             <button className="btn btn-primary modal-pay-btn" onClick={handleDone}>
-              🎉 {t.viewSummary}
+              🎉 {t.finish || 'Finish'}
             </button>
           </div>
         )}

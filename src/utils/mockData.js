@@ -1,104 +1,4 @@
-// ===== Google Books API Service with Caching Layer =====
-
-const BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
-
-// Simple in-memory cache to make the app "Instant" when navigating back
-const cache = {
-  search: {},
-  details: {},
-  categories: {}
-};
-
-// Fetch books by search query with language support
-export async function searchBooks(query, maxResults = 40, lang = 'en') {
-  const cacheKey = `${query}_${lang}`;
-  if (cache.search[cacheKey]) return cache.search[cacheKey];
-  
-  try {
-    const res = await fetch(`${BASE_URL}?q=${encodeURIComponent(query)}&maxResults=${maxResults}&langRestrict=${lang}`);
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
-    const data = await res.json();
-    const results = (data.items || []).map(formatBook);
-    
-    cache.search[cacheKey] = results;
-    return results;
-  } catch (error) {
-    console.error("Fetch failed for query:", query, error);
-    return INDIAN_FEATURED_BOOKS.slice(0, maxResults);
-  }
-}
-
-// Fetch a single book by ID
-export async function getBookById(id) {
-  // Check static Indian books first
-  const staticBook = INDIAN_FEATURED_BOOKS.find(b => b.id === id);
-  if (staticBook) return staticBook;
-
-  if (cache.details[id]) return cache.details[id];
-
-  try {
-    const res = await fetch(`${BASE_URL}/${id}`);
-    if (!res.ok) throw new Error('Failed to fetch book details');
-    const data = await res.json();
-    const book = formatBook(data);
-    
-    cache.details[id] = book;
-    return book;
-  } catch (error) {
-    return null;
-  }
-}
-
-// Fetch books by category/genre with language support
-export async function getBooksByCategory(category, maxResults = 40, lang = 'en') {
-  const cacheKey = `${category}_${lang}`;
-  if (cache.categories[cacheKey]) return cache.categories[cacheKey];
-
-  try {
-    const res = await fetch(`${BASE_URL}?q=subject:${encodeURIComponent(category)}&maxResults=${maxResults}&orderBy=relevance&langRestrict=${lang}`);
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
-    const data = await res.json();
-    const results = (data.items || []).map(formatBook);
-    
-    cache.categories[cacheKey] = results;
-    return results;
-  } catch (error) {
-    console.error("Category fetch failed:", category, error);
-    return INDIAN_FEATURED_BOOKS.filter(b => b.categories.includes(category)).slice(0, maxResults);
-  }
-}
-
-// Format raw API data into a clean book object
-function formatBook(item) {
-  const v = item.volumeInfo || {};
-  return {
-    id: item.id,
-    title: v.title || 'Untitled',
-    authors: v.authors || ['Unknown Author'],
-    description: v.description || 'Description Not Available',
-    categories: v.categories || ['General'],
-    rating: v.averageRating || null,
-    ratingsCount: v.ratingsCount || 0,
-    image: v.imageLinks?.thumbnail?.replace('http:', 'https:') || null,
-    publishedDate: v.publishedDate || 'Unknown',
-    pageCount: v.pageCount || 0,
-    publisher: v.publisher || 'Unknown Publisher',
-    price: generateIndianPrice(v.title),
-    previewLink: v.previewLink || '#',
-  };
-}
-
-// Generate a consistent Indian price (₹) from book title
-function generateIndianPrice(title) {
-  if (!title) return 299;
-  let hash = 0;
-  for (let i = 0; i < title.length; i++) {
-    hash = title.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return Math.abs(hash % 800) + 199; // Range: ₹199 to ₹999
-}
-
-// ===== Static Indian Featured Books =====
+// Static Indian Featured Books
 export const INDIAN_FEATURED_BOOKS = [
   {
     id: 'indian-1',
@@ -552,7 +452,6 @@ export const INDIAN_FEATURED_BOOKS = [
   },
 ];
 
-// Genre categories for browsing
 export const CATEGORIES = [
   'Fiction',
   'Self-Help',

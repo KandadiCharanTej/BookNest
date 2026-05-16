@@ -1,20 +1,26 @@
-import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { Link } from 'react-router-dom';
-import './Profile.css';
+// Importing necessary hooks and components
+import { useState } from 'react'; // Hook for managing form inputs and edit state
+import { useAuth } from '../../context/AuthContext'; // Hook to access user data and update profile
+import { Link } from 'react-router-dom'; // Component for navigation
+import './Profile.css'; // Importing profile-specific styles
 
+// Functional component for the User Profile page
 export default function Profile() {
+  // Destructuring values from the Authentication context
   const { user, updateProfile, logout } = useAuth();
   
-  // State for form fields
+  // State to track whether the form is in "Edit Mode"
   const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-  });
+  
+  // State for showing a brief success message after saving
+  const [message, setMessage] = useState('');
 
-  const [addressData, setAddressData] = useState({
+  // Local state for basic personal information
+  const [name, setName] = useState(user?.name || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  
+  // Local state for address details, grouped as an object
+  const [address, setAddress] = useState({
     fullName: user?.address?.fullName || '',
     mobile: user?.address?.mobile || '',
     street: user?.address?.street || '',
@@ -24,55 +30,62 @@ export default function Profile() {
     pincode: user?.address?.pincode || '',
   });
 
-  const [message, setMessage] = useState('');
-
-  // Handle Save
+  // Function to handle saving the updated profile
   const handleSave = (e) => {
-    e.preventDefault();
-    updateProfile({
-      ...profileData,
-      address: addressData
-    });
+    e.preventDefault(); // Prevent standard form reload
+    
+    // Call the global update function with the new values
+    updateProfile({ name, phone, address });
+    
+    // Exit edit mode and show success feedback
     setIsEditing(false);
     setMessage('Profile updated successfully! ✅');
+    
+    // Clear message after 3 seconds
     setTimeout(() => setMessage(''), 3000);
   };
 
-  // Check if address is complete
-  const isAddressComplete = addressData.fullName && addressData.city && addressData.pincode;
-
   return (
-    <main className="profile-page container" id="profile-page">
+    // Main wrapper for the profile page
+    <main className="profile-page container">
+      
+      {/* Header section with page title */}
       <div className="profile-header">
         <h1 className="page-title">👤 My Profile</h1>
-        <p className="page-subtitle">Manage your personal information and delivery addresses</p>
+        <p className="page-subtitle">Manage your personal details and delivery addresses</p>
       </div>
 
+      {/* Success notification popup */}
       {message && <div className="toast-msg">{message}</div>}
 
+      {/* Layout Grid: Sidebar on the left, Main form on the right */}
       <div className="profile-layout">
-        {/* Sidebar */}
+        
+        {/* Sidebar section with avatar and navigation */}
         <aside className="profile-sidebar glass-card">
           <div className="profile-avatar-large">
+            {/* Show first letter of user's name as an avatar */}
             {user?.name?.charAt(0) || 'U'}
           </div>
           <h2 className="profile-name-side">{user?.name}</h2>
           <p className="profile-email-side">{user?.email}</p>
           
           <div className="profile-nav-vertical">
-            <button className="nav-btn active">Personal Info</button>
+            {/* Quick links to orders and logout */}
             <Link to="/orders" className="nav-btn">My Orders</Link>
-            <button className="nav-btn" onClick={logout}>Logout</button>
+            <button className="nav-btn logout-btn" onClick={logout}>Logout</button>
           </div>
         </aside>
 
-        {/* Main Content */}
+        {/* Main Content Area: Profile Form */}
         <section className="profile-content">
           <form onSubmit={handleSave}>
-            {/* Personal Details */}
+            
+            {/* Section 1: Personal Details */}
             <div className="profile-section glass-card">
               <div className="section-header">
                 <h3>Personal Information</h3>
+                {/* Toggle edit mode button */}
                 {!isEditing && (
                   <button type="button" className="btn btn-sm btn-secondary" onClick={() => setIsEditing(true)}>
                     Edit Profile
@@ -85,18 +98,18 @@ export default function Profile() {
                   <label>Full Name</label>
                   <input 
                     type="text" 
-                    value={profileData.name} 
-                    disabled={!isEditing}
-                    onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                    value={name} 
+                    disabled={!isEditing} // Input disabled if not editing
+                    onChange={(e) => setName(e.target.value)}
                     className="form-input"
                   />
                 </div>
                 <div className="form-group">
                   <label>Email Address</label>
                   <input 
-                    type="email" 
-                    value={profileData.email} 
-                    disabled={true} // Email usually fixed
+                    type="text" 
+                    value={user?.email} 
+                    disabled={true} // Email is usually non-editable
                     className="form-input"
                   />
                 </div>
@@ -104,106 +117,72 @@ export default function Profile() {
                   <label>Phone Number</label>
                   <input 
                     type="tel" 
-                    value={profileData.phone} 
+                    value={phone} 
                     disabled={!isEditing}
                     placeholder="Enter phone number"
-                    onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                    onChange={(e) => setPhone(e.target.value)}
                     className="form-input"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Address Details */}
-            <div className="profile-section glass-card" id="address-section">
-              <div className="section-header">
-                <h3>Delivery Address</h3>
-                {!isAddressComplete && !isEditing && (
-                  <span className="warning-text">⚠️ Please add address for checkout</span>
-                )}
-              </div>
-
+            {/* Section 2: Address Details */}
+            <div className="profile-section glass-card">
+              <h3>Delivery Address</h3>
               <div className="form-grid">
+                {/* Recipient Full Name */}
                 <div className="form-group full-width">
-                  <label>Recipient Name</label>
+                  <label>Recipient Full Name</label>
                   <input 
                     type="text" 
-                    value={addressData.fullName} 
+                    value={address.fullName} 
                     disabled={!isEditing}
-                    placeholder="Full name of recipient"
-                    onChange={(e) => setAddressData({...addressData, fullName: e.target.value})}
+                    onChange={(e) => setAddress({...address, fullName: e.target.value})}
+                    placeholder="e.g. John Doe"
                     className="form-input"
                   />
                 </div>
+                {/* Street/House Info */}
                 <div className="form-group">
-                  <label>Mobile Number</label>
-                  <input 
-                    type="tel" 
-                    value={addressData.mobile} 
-                    disabled={!isEditing}
-                    placeholder="10-digit mobile number"
-                    onChange={(e) => setAddressData({...addressData, mobile: e.target.value})}
-                    className="form-input"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>House No. / Street</label>
+                  <label>House/Street</label>
                   <input 
                     type="text" 
-                    value={addressData.street} 
+                    value={address.street} 
                     disabled={!isEditing}
-                    placeholder="Flat, House no., Building"
-                    onChange={(e) => setAddressData({...addressData, street: e.target.value})}
+                    onChange={(e) => setAddress({...address, street: e.target.value})}
+                    placeholder="Flat/House No"
                     className="form-input"
                   />
                 </div>
-                <div className="form-group">
-                  <label>Area / Colony</label>
-                  <input 
-                    type="text" 
-                    value={addressData.area} 
-                    disabled={!isEditing}
-                    placeholder="Area, Street, Sector, Village"
-                    onChange={(e) => setAddressData({...addressData, area: e.target.value})}
-                    className="form-input"
-                  />
-                </div>
+                {/* City */}
                 <div className="form-group">
                   <label>City</label>
                   <input 
                     type="text" 
-                    value={addressData.city} 
+                    value={address.city} 
                     disabled={!isEditing}
+                    onChange={(e) => setAddress({...address, city: e.target.value})}
                     placeholder="Town/City"
-                    onChange={(e) => setAddressData({...addressData, city: e.target.value})}
                     className="form-input"
                   />
                 </div>
-                <div className="form-group">
-                  <label>State</label>
-                  <input 
-                    type="text" 
-                    value={addressData.state} 
-                    disabled={!isEditing}
-                    placeholder="State"
-                    onChange={(e) => setAddressData({...addressData, state: e.target.value})}
-                    className="form-input"
-                  />
-                </div>
+                {/* Pincode */}
                 <div className="form-group">
                   <label>Pincode</label>
                   <input 
                     type="text" 
-                    value={addressData.pincode} 
+                    value={address.pincode} 
                     disabled={!isEditing}
-                    placeholder="6 digits [0-9]"
-                    onChange={(e) => setAddressData({...addressData, pincode: e.target.value})}
+                    onChange={(e) => setAddress({...address, pincode: e.target.value})}
+                    placeholder="6-digit code"
                     className="form-input"
                   />
                 </div>
               </div>
             </div>
 
+            {/* Save and Cancel buttons, only visible in Edit Mode */}
             {isEditing && (
               <div className="profile-actions">
                 <button type="submit" className="btn btn-primary">Save Changes</button>

@@ -1,56 +1,85 @@
-// Trending Page - Shows currently trending books
-import { useState, useEffect } from 'react';
-import BookCard from '../../components/BookCard';
-import Loader from '../../components/Loader';
-import { useLanguage } from '../../context/LanguageContext';
-import { searchBooks } from '../../services/api';
-import './Trending.css';
+// Importing hooks and components
+import { useState, useEffect } from 'react'; // React hooks
+import BookCard from '../../components/BookCard'; // Individual book display
+import Loader from '../../components/Loader'; // Loading spinner
+import { useLanguage } from '../../context/LanguageContext'; // For multi-language
+import { INDIAN_FEATURED_BOOKS } from '../../utils/mockData'; // Fallback data
+import './Trending.css'; // Page styles
 
+// Functional component for the Trending page
 export default function Trending() {
-  const { lang, t } = useLanguage();
+  // Getting language translations and current language code
+  const { t, lang } = useLanguage(); 
+  
+  // State for the list of trending books
   const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  
+  // State to track if data is being fetched
+  const [loading, setLoading] = useState(false);
 
-  // Fetch trending books on page load
+  // Re-run fetching whenever the language changes
   useEffect(() => {
-    const loadTrending = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const results = await searchBooks('trending bestsellers 2024', 40, lang);
-        setBooks(results);
-      } catch {
-        setError('Failed to load trending books. Please try again.');
-      }
-      setLoading(false);
-    };
-    loadTrending();
+    fetchTrending();
   }, [lang]);
 
-  const retryLoad = () => window.location.reload();
+  // Function to call the Google Books API for trending books
+  const fetchTrending = async () => {
+    try {
+      setLoading(true); // Start loading spinner
+      
+      // Fetch books with the 'trending bestsellers' query from the API
+      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=trending+bestsellers+2024&maxResults=20&langRestrict=${lang}`);
+      const data = await res.json(); // Convert response to JSON
+      
+      // If we found books in the results
+      if (data.items) {
+        // Map API data into our simplified format for the BookCard component
+        const formatted = data.items.map(item => ({
+          id: item.id,
+          title: item.volumeInfo.title,
+          authors: item.volumeInfo.authors || ['Unknown Author'],
+          price: 499, // Static price for presentation
+          image: item.volumeInfo.imageLinks?.thumbnail || null,
+          categories: item.volumeInfo.categories || ['Trending'],
+          rating: item.volumeInfo.averageRating || 4.5
+        }));
+        setBooks(formatted); // Update state
+      } else {
+        // Fallback to static data if no API results
+        setBooks(INDIAN_FEATURED_BOOKS.slice(0, 20));
+      }
+    } catch (err) {
+      // Log errors and use local data if API fails
+      console.log(err);
+      setBooks(INDIAN_FEATURED_BOOKS.slice(0, 20));
+    } finally {
+      setLoading(false); // Stop loading spinner
+    }
+  };
 
   return (
-    <main className="trending-page container" id="trending-page">
+    // Main container for the trending page
+    <main className="trending-page container">
+      
+      {/* Header section with page title and description */}
       <div className="trending-header">
         <h1 className="page-title">🔥 {t.trending}</h1>
-        <p className="page-subtitle">{t.trendingSubtitle || 'Discover what everyone is reading right now'}</p>
+        <p className="page-subtitle">{t.trendingSubtitle}</p>
       </div>
 
-      {error && (
-        <div className="error-container">
-          <div className="error-msg">{error}</div>
-          <button className="btn btn-secondary" onClick={retryLoad}>🔄 Retry</button>
-        </div>
-      )}
-
+      {/* Conditional rendering based on loading state */}
       {loading ? (
-        <Loader />
+        <Loader /> // Show spinner while loading
       ) : (
+        /* Render the grid of book cards */
         <div className="books-grid">
-          {books.map((book) => (
-            <BookCard key={book.id} book={book} />
-          ))}
+          {books.length > 0 ? (
+            /* Map through each book and render a BookCard component */
+            books.map(book => <BookCard key={book.id} book={book} />)
+          ) : (
+            /* Simple text if no books are available */
+            <p>Unable to load books right now.</p>
+          )}
         </div>
       )}
     </main>

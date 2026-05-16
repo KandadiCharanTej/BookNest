@@ -49,20 +49,6 @@
   color: var(--text-secondary);
 }
 
-.details-rating {
-  font-size: 1.1rem;
-}
-
-.detail-stars {
-  font-size: 1.2rem;
-}
-
-.detail-no-rating {
-  color: #64748B;
-  font-style: italic;
-  font-size: 0.9rem;
-}
-
 .details-price {
   font-size: 1.8rem;
   font-weight: 800;
@@ -116,6 +102,43 @@
   gap: 14px;
   margin-top: 12px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Details Page Quantity Selector */
+.details-qty-selector {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: rgba(249, 115, 22, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  border-radius: 12px;
+}
+
+.details-qty-selector .qty-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--bg-secondary);
+  color: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+.details-qty-selector .qty-btn:hover {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.details-qty-selector .qty-value {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary);
 }
 
 /* Wikipedia Button */
@@ -148,5 +171,9 @@
   }
   .details-actions {
     flex-direction: column;
+    align-items: stretch;
+  }
+  .details-qty-selector {
+    justify-content: center;
   }
 }

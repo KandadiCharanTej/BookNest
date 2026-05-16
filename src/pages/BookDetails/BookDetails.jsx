@@ -1,138 +1,143 @@
-// Book Details Page - Shows full book information
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import BookCard from '../../components/BookCard';
-import Loader from '../../components/Loader';
-import { useCart } from '../../context/CartContext';
-import { useWishlist } from '../../context/WishlistContext';
-import { getBookById, getBooksByCategory, INDIAN_FEATURED_BOOKS } from '../../services/api';
-import './BookDetails.css';
+// Importing hooks and components from React and Router
+import { useState, useEffect } from 'react'; // Hooks for state and side effects
+import { useParams } from 'react-router-dom'; // Hook to get the 'id' from the URL
+import BookCard from '../../components/BookCard'; // Component for similar books list
+import Loader from '../../components/Loader'; // Loading spinner
+import { useCart } from '../../context/CartContext'; // Hook for cart management
+import { useWishlist } from '../../context/WishlistContext'; // Hook for wishlist management
+import { INDIAN_FEATURED_BOOKS } from '../../utils/mockData'; // Static local data for fallback
+import './BookDetails.css'; // Specific styles for this page
 
-const PLACEHOLDER = 'https://via.placeholder.com/300x450/1E293B/F97316?text=No+Cover';
+// Premium placeholder image for books without a thumbnail
+const PLACEHOLDER = 'https://images.unsplash.com/photo-1543004218-ee141104975a?q=80&w=400&auto=format&fit=crop';
 
+// Functional component for the Book Details page
 export default function BookDetails() {
+  // Get the 'id' parameter from the URL
   const { id } = useParams();
-  const { addToCart } = useCart();
+  
+  // Access global functions for Cart and Wishlist
+  const { addToCart, cartItems, increaseQuantity, decreaseQuantity } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
+  // State to store the details of the specific book
   const [book, setBook] = useState(null);
+  
+  // State to store a list of similar books
   const [similar, setSimilar] = useState([]);
+  
+  // State to track if the page is currently loading data
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // Fetch book details when page loads or ID changes
+  // useEffect runs whenever the 'id' in the URL changes
   useEffect(() => {
-    window.scrollTo(0, 0);
-
-    const loadBook = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        // Check if it's a static Indian book first
-        const indianBook = INDIAN_FEATURED_BOOKS.find((b) => b.id === id);
-
-        if (indianBook) {
-          setBook(indianBook);
-          // Show other Indian books as similar
-          setSimilar(INDIAN_FEATURED_BOOKS.filter((b) => b.id !== id).slice(0, 4));
-        } else {
-          // Fetch from Google Books API
-          const fetchedBook = await getBookById(id);
-          setBook(fetchedBook);
-
-          // Track genre for recommendations
-          const genres = JSON.parse(localStorage.getItem('booknest_genres') || '[]');
-          const cat = fetchedBook.categories[0];
-          if (cat && cat !== 'General' && !genres.includes(cat)) {
-            genres.push(cat);
-            localStorage.setItem('booknest_genres', JSON.stringify(genres.slice(-5)));
-          }
-
-          // Fetch similar books from same category
-          if (cat && cat !== 'General') {
-            const simBooks = await getBooksByCategory(cat, 6);
-            setSimilar(simBooks.filter((b) => b.id !== id));
-          }
-        }
-      } catch {
-        setError('Failed to load book details. Please try again.');
-      }
-      setLoading(false);
-    };
-
-    loadBook();
+    window.scrollTo(0, 0); // Reset scroll position to top
+    fetchBook(); // Load the specific book data
   }, [id]);
 
-  // Open Wikipedia page for the book
+  // Function to fetch book details
+  const fetchBook = async () => {
+    try {
+      setLoading(true); // Show loader
+
+      // 1. Check local static data first
+      const indianBook = INDIAN_FEATURED_BOOKS.find(b => b.id === id);
+      if (indianBook) {
+        setBook(indianBook);
+        setSimilar(INDIAN_FEATURED_BOOKS.filter(b => b.id !== id).slice(0, 4));
+        setLoading(false);
+        return;
+      }
+
+      // 2. Fetch from Google Books API
+      const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${id}`);
+      const data = await res.json();
+      
+      if (data.volumeInfo) {
+        const formatted = {
+          id: data.id,
+          title: data.volumeInfo.title,
+          authors: data.volumeInfo.authors || ['Unknown Author'],
+          price: 499,
+          image: data.volumeInfo.imageLinks?.thumbnail || data.volumeInfo.imageLinks?.medium || null,
+          description: data.volumeInfo.description || 'No description available.',
+          categories: data.volumeInfo.categories || ['General'],
+          rating: data.volumeInfo.averageRating || 4.2,
+          publishedDate: data.volumeInfo.publishedDate || 'Unknown',
+          publisher: data.volumeInfo.publisher || 'Unknown Publisher',
+          pageCount: data.volumeInfo.pageCount || 0,
+        };
+        setBook(formatted);
+
+        // 3. Fetch similar books
+        if (formatted.categories[0]) {
+          const simRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=subject:${encodeURIComponent(formatted.categories[0])}&maxResults=5`);
+          const simData = await simRes.json();
+          if (simData.items) {
+             const simFormatted = simData.items.map(item => ({
+               id: item.id,
+               title: item.volumeInfo.title,
+               authors: item.volumeInfo.authors || ['Unknown Author'],
+               price: 399,
+               image: item.volumeInfo.imageLinks?.thumbnail || null,
+               categories: item.volumeInfo.categories || [formatted.categories[0]],
+               rating: item.volumeInfo.averageRating || 4.0
+             }));
+             setSimilar(simFormatted.filter(b => b.id !== id));
+          }
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Wikipedia search helper
   const openWikipedia = () => {
-    const searchTerm = book.title.replace(/ /g, '_');
+    const searchTerm = book.title.split(' ').join('_');
     window.open(`https://en.wikipedia.org/wiki/${searchTerm}`, '_blank');
   };
 
-  // Render star rating
-  const renderStars = (rating) => {
-    if (!rating) return <span className="detail-no-rating">No Ratings Available</span>;
-    let stars = '';
-    for (let i = 0; i < 5; i++) {
-      stars += i < Math.round(rating) ? '★' : '☆';
-    }
-    return (
-      <span className="stars detail-stars">
-        {stars} <span className="rating-num">{rating} / 5</span>
-      </span>
-    );
+  // Image error fallback
+  const handleImageError = (e) => {
+    e.target.src = PLACEHOLDER;
+    e.target.onerror = null;
   };
 
-  // Show loader while fetching
   if (loading) return <Loader />;
-
-  // Show error message
-  if (error) {
-    return (
-      <div className="container section">
-        <div className="error-msg">{error}</div>
-      </div>
-    );
-  }
-
-  if (!book) return null;
+  if (!book) return <div className="container">Unable to load book details.</div>;
 
   const wishlisted = isInWishlist(book.id);
+  const cartItem = cartItems.find((item) => item.id === book.id); // Check if in cart
 
   return (
     <main className="book-details-page">
       <div className="container">
         <div className="details-layout">
-          {/* Left Side - Book Image */}
+          
           <div className="details-image-col">
             <div className="details-image-wrap glass-card">
-              <img
-                src={book.image || PLACEHOLDER}
-                alt={book.title}
-                className="details-image"
-                onError={(e) => { e.target.src = PLACEHOLDER; }}
+              <img 
+                src={book.image || PLACEHOLDER} 
+                alt={book.title} 
+                className="details-image" 
+                onError={handleImageError}
               />
             </div>
           </div>
 
-          {/* Right Side - Book Info */}
           <div className="details-info-col">
             <span className="badge badge-genre">{book.categories[0]}</span>
             <h1 className="details-title">{book.title}</h1>
             <p className="details-author">by {book.authors.join(', ')}</p>
-            <div className="details-rating">{renderStars(book.rating)}</div>
             <p className="details-price">₹{book.price}</p>
 
-            {/* Book metadata */}
             <div className="details-meta">
               <div className="meta-item">
                 <span className="meta-label">Published</span>
                 <span className="meta-value">{book.publishedDate}</span>
-              </div>
-              <div className="meta-item">
-                <span className="meta-label">Publisher</span>
-                <span className="meta-value">{book.publisher}</span>
               </div>
               <div className="meta-item">
                 <span className="meta-label">Pages</span>
@@ -140,39 +145,40 @@ export default function BookDetails() {
               </div>
             </div>
 
-            {/* Description */}
             <div className="details-description">
               <h3>About this book</h3>
               <p dangerouslySetInnerHTML={{ __html: book.description }}></p>
             </div>
 
-            {/* Action buttons */}
             <div className="details-actions">
-              <button className="btn btn-primary" onClick={() => addToCart(book)} id="detail-add-cart">
-                🛒 Add to Cart
-              </button>
-              <button
+              {/* Conditional Cart Controls in Details Page */}
+              {cartItem ? (
+                <div className="details-qty-selector glass-card">
+                  <button className="qty-btn" onClick={() => decreaseQuantity(book.id)}>−</button>
+                  <span className="qty-value">{cartItem.quantity} in Cart</span>
+                  <button className="qty-btn" onClick={() => increaseQuantity(book.id)}>+</button>
+                </div>
+              ) : (
+                <button className="btn btn-primary" onClick={() => addToCart(book)}>🛒 Add to Cart</button>
+              )}
+              
+              <button 
                 className={`btn ${wishlisted ? 'btn-danger' : 'btn-secondary'}`}
                 onClick={() => wishlisted ? removeFromWishlist(book.id) : addToWishlist(book)}
-                id="detail-wishlist"
               >
-                {wishlisted ? '💔 Remove from Wishlist' : '♥ Add to Wishlist'}
+                {wishlisted ? '💔 Remove' : '♥ Wishlist'}
               </button>
-              <button className="btn btn-wiki" onClick={openWikipedia} id="detail-wikipedia">
-                🌐 Research on Wikipedia
-              </button>
+              
+              <button className="btn btn-wiki" onClick={openWikipedia}>🌐 Wikipedia</button>
             </div>
           </div>
         </div>
 
-        {/* Similar Books Section */}
         {similar.length > 0 && (
-          <section className="section" id="similar-books">
+          <section className="section">
             <h2 className="section-title">📖 Similar Books</h2>
             <div className="books-grid">
-              {similar.map((b) => (
-                <BookCard key={b.id} book={b} />
-              ))}
+              {similar.map(b => <BookCard key={b.id} book={b} />)}
             </div>
           </section>
         )}

@@ -1,100 +1,117 @@
-// Explore Page - Search and browse all books
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import BookCard from '../../components/BookCard';
-import Loader from '../../components/Loader';
-import { useLanguage } from '../../context/LanguageContext';
-import { searchBooks } from '../../services/api';
-import './Explore.css';
+// Importing hooks and components from React and React Router
+import { useState, useEffect } from 'react'; // State and lifecycle hooks
+import { useSearchParams, useNavigate } from 'react-router-dom'; // Hooks for URL parameters and navigation
+import BookCard from '../../components/BookCard'; // Individual book display component
+import Loader from '../../components/Loader'; // Loading indicator
+import { useLanguage } from '../../context/LanguageContext'; // Hook for multi-language support
+import { INDIAN_FEATURED_BOOKS } from '../../utils/mockData'; // Local data for fallback
+import './Explore.css'; // Importing custom styles for this page
 
+// Functional component for the Explore/Search page
 export default function Explore() {
-  const { lang, t } = useLanguage();
+  // Accessing language translations
+  const { t, lang } = useLanguage(); 
+  
+  // searchParams allows us to read values from the URL like ?search=harry
   const [searchParams] = useSearchParams();
-  const searchQuery = searchParams.get('search') || '';
-
+  
+  // useNavigate lets us programmatically change the URL
+  const navigate = useNavigate();
+  
+  // State to store the list of books found
   const [books, setBooks] = useState([]);
-  const [query, setQuery] = useState(searchQuery);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  
+  // Local state to manage the search input text
+  const [query, setQuery] = useState(searchParams.get('search') || '');
+  
+  // State to track if data is currently being fetched
+  const [loading, setLoading] = useState(false);
 
-  // Fetch books when search query changes
+  // Triggered whenever the search parameter in the URL or the language changes
   useEffect(() => {
-    setQuery(searchQuery); // Keep input in sync with URL
-    
-    const loadBooks = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const searchTerm = searchQuery || 'trending bestsellers';
-        // Fetch 40 books (max per request)
-        const results = await searchBooks(searchTerm, 40, lang);
-        setBooks(results || []);
-      } catch {
-        setError('Failed to load books. Please check your connection.');
-      }
-      setLoading(false);
-    };
-    loadBooks();
-  }, [searchQuery, lang]);
+    // Get the current search term from the URL, or use a default one
+    const searchTerm = searchParams.get('search') || 'trending bestsellers';
+    fetchResults(searchTerm); // Start the API fetch
+  }, [searchParams, lang]);
 
-  const retryLoad = () => {
-    window.location.reload();
+  // Function to fetch book results from the Google Books API
+  const fetchResults = async (term) => {
+    try {
+      setLoading(true); // Start loading animation
+      
+      // Fetch books from the API based on the search term and current language
+      const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(term)}&maxResults=20&langRestrict=${lang}`);
+      const data = await response.json(); // Parse results
+      
+      // If books are found
+      if (data.items) {
+        // Map API data to our clean format for the BookCard component
+        const formatted = data.items.map(item => ({
+          id: item.id,
+          title: item.volumeInfo.title,
+          authors: item.volumeInfo.authors || ['Unknown Author'],
+          price: 399, // Static price for demo
+          image: item.volumeInfo.imageLinks?.thumbnail || null,
+          categories: item.volumeInfo.categories || ['Explore'],
+          rating: item.volumeInfo.averageRating || 4.0
+        }));
+        setBooks(formatted); // Update book list
+      } else {
+        // If no results, show fallback data
+        setBooks(INDIAN_FEATURED_BOOKS.slice(0, 20));
+      }
+    } catch (error) {
+      // Handle network errors by logging and showing fallback data
+      console.log(error);
+      setBooks(INDIAN_FEATURED_BOOKS.slice(0, 20));
+    } finally {
+      setLoading(false); // Stop loading animation
+    }
   };
 
-  const navigate = useNavigate();
-
-  // Handle search form submit
+  // Function triggered when the user submits the search form
   const handleSearch = (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent page refresh
     if (query.trim()) {
+      // Update the URL with the new search term, which triggers the useEffect
       navigate(`/explore?search=${encodeURIComponent(query.trim())}`);
     }
   };
 
   return (
-    <main className="explore-page container" id="explore-page">
+    // Main container for the explore page
+    <main className="explore-page container">
+      
+      {/* Header section with Title and Search Input */}
       <div className="explore-header">
         <h1 className="page-title">📚 {t.explore}</h1>
-        <p className="page-subtitle">
-          {searchQuery
-            ? `Showing results for "${searchQuery}"`
-            : t.heroSubtitle}
-        </p>
-
-        {/* Search form */}
+        
+        {/* Search Bar Form */}
         <form className="explore-search" onSubmit={handleSearch}>
           <input
             type="text"
             placeholder={t.searchPlaceholder}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="form-input explore-search-input"
-            id="explore-search-input"
+            value={query} // Bind input to local state
+            onChange={(e) => setQuery(e.target.value)} // Update state on typing
+            className="form-input"
           />
-          <button type="submit" className="btn btn-primary" id="explore-search-btn">
-            🔍 {t.explore}
-          </button>
+          {/* Submit button with search icon */}
+          <button type="submit" className="btn btn-primary">🔍 {t.explore}</button>
         </form>
       </div>
 
-      {/* Results */}
-      {error && (
-        <div className="error-container">
-          <div className="error-msg">{error}</div>
-          <button className="btn btn-secondary" onClick={retryLoad}>🔄 Retry</button>
-        </div>
-      )}
-
+      {/* Conditional Rendering: Show loader or the grid of books */}
       {loading ? (
         <Loader />
-      ) : books.length === 0 ? (
-        <div className="empty-state">
-          <p className="empty-state-icon">🔍</p>
-          <h3>No books found</h3>
-          <p>Try a different search term</p>
-        </div>
       ) : (
-        <div className="books-grid">{books.map((b) => <BookCard key={b.id} book={b} />)}</div>
+        <div className="books-grid">
+          {/* If books exist, map through them; otherwise show error text */}
+          {books.length > 0 ? (
+            books.map(book => <BookCard key={book.id} book={book} />)
+          ) : (
+            <p>Unable to load books right now.</p>
+          )}
+        </div>
       )}
     </main>
   );
