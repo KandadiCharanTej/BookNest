@@ -54,12 +54,16 @@ export default function BookDetails() {
       const data = await res.json();
       
       if (data.volumeInfo) {
+        // CRITICAL: Force HTTPS for main book image
+        const rawImage = data.volumeInfo.imageLinks?.thumbnail || data.volumeInfo.imageLinks?.medium || null;
+        const secureImage = rawImage ? rawImage.replace('http://', 'https://') : null;
+
         const formatted = {
           id: data.id,
           title: data.volumeInfo.title,
           authors: data.volumeInfo.authors || ['Unknown Author'],
           price: 499,
-          image: data.volumeInfo.imageLinks?.thumbnail || data.volumeInfo.imageLinks?.medium || null,
+          image: secureImage,
           description: data.volumeInfo.description || 'No description available.',
           categories: data.volumeInfo.categories || ['General'],
           rating: data.volumeInfo.averageRating || 4.2,
@@ -74,15 +78,21 @@ export default function BookDetails() {
           const simRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=subject:${encodeURIComponent(formatted.categories[0])}&maxResults=5`);
           const simData = await simRes.json();
           if (simData.items) {
-             const simFormatted = simData.items.map(item => ({
-               id: item.id,
-               title: item.volumeInfo.title,
-               authors: item.volumeInfo.authors || ['Unknown Author'],
-               price: 399,
-               image: item.volumeInfo.imageLinks?.thumbnail || null,
-               categories: item.volumeInfo.categories || [formatted.categories[0]],
-               rating: item.volumeInfo.averageRating || 4.0
-             }));
+             const simFormatted = simData.items.map(item => {
+               // CRITICAL: Force HTTPS for similar books images
+               const simRawImage = item.volumeInfo.imageLinks?.thumbnail || null;
+               const simSecureImage = simRawImage ? simRawImage.replace('http://', 'https://') : null;
+
+               return {
+                 id: item.id,
+                 title: item.volumeInfo.title,
+                 authors: item.volumeInfo.authors || ['Unknown Author'],
+                 price: 399,
+                 image: simSecureImage,
+                 categories: item.volumeInfo.categories || [formatted.categories[0]],
+                 rating: item.volumeInfo.averageRating || 4.0
+               };
+             });
              setSimilar(simFormatted.filter(b => b.id !== id));
           }
         }

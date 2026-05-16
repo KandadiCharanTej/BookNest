@@ -37,15 +37,21 @@ export default function Categories() {
       // If we got items back from the API
       if (data.items) {
         // Format the API items into our clean book object format
-        const formatted = data.items.map(item => ({
-          id: item.id,
-          title: item.volumeInfo.title,
-          authors: item.volumeInfo.authors || ['Unknown Author'],
-          price: 399, // Static price for display
-          image: item.volumeInfo.imageLinks?.thumbnail || null,
-          categories: item.volumeInfo.categories || [cat],
-          rating: item.volumeInfo.averageRating || 4.1
-        }));
+        const formatted = data.items.map(item => {
+           // CRITICAL: Force HTTPS for all book images to prevent "Mixed Content" security blocks
+          const rawImage = item.volumeInfo.imageLinks?.thumbnail || null;
+          const secureImage = rawImage ? rawImage.replace('http://', 'https://') : null;
+
+          return {
+            id: item.id,
+            title: item.volumeInfo.title,
+            authors: item.volumeInfo.authors || ['Unknown Author'],
+            price: 399, // Static price for display
+            image: secureImage,
+            categories: item.volumeInfo.categories || [cat],
+            rating: item.volumeInfo.averageRating || 4.1
+          };
+        });
         setBooks(formatted); // Update book list state
       } else {
         // Use static local data if no API results found

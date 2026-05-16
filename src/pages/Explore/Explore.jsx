@@ -46,15 +46,21 @@ export default function Explore() {
       // If books are found
       if (data.items) {
         // Map API data to our clean format for the BookCard component
-        const formatted = data.items.map(item => ({
-          id: item.id,
-          title: item.volumeInfo.title,
-          authors: item.volumeInfo.authors || ['Unknown Author'],
-          price: 399, // Static price for demo
-          image: item.volumeInfo.imageLinks?.thumbnail || null,
-          categories: item.volumeInfo.categories || ['Explore'],
-          rating: item.volumeInfo.averageRating || 4.0
-        }));
+        const formatted = data.items.map(item => {
+          // CRITICAL: Force HTTPS for all book images to prevent "Mixed Content" security blocks
+          const rawImage = item.volumeInfo.imageLinks?.thumbnail || null;
+          const secureImage = rawImage ? rawImage.replace('http://', 'https://') : null;
+
+          return {
+            id: item.id,
+            title: item.volumeInfo.title,
+            authors: item.volumeInfo.authors || ['Unknown Author'],
+            price: 399, // Static price for demo
+            image: secureImage,
+            categories: item.volumeInfo.categories || ['Explore'],
+            rating: item.volumeInfo.averageRating || 4.0
+          };
+        });
         setBooks(formatted); // Update book list
       } else {
         // If no results, show fallback data

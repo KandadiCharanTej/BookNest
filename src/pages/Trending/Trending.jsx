@@ -34,15 +34,21 @@ export default function Trending() {
       // If we found books in the results
       if (data.items) {
         // Map API data into our simplified format for the BookCard component
-        const formatted = data.items.map(item => ({
-          id: item.id,
-          title: item.volumeInfo.title,
-          authors: item.volumeInfo.authors || ['Unknown Author'],
-          price: 499, // Static price for presentation
-          image: item.volumeInfo.imageLinks?.thumbnail || null,
-          categories: item.volumeInfo.categories || ['Trending'],
-          rating: item.volumeInfo.averageRating || 4.5
-        }));
+        const formatted = data.items.map(item => {
+           // CRITICAL: Force HTTPS for all book images to prevent "Mixed Content" security blocks
+          const rawImage = item.volumeInfo.imageLinks?.thumbnail || null;
+          const secureImage = rawImage ? rawImage.replace('http://', 'https://') : null;
+
+          return {
+            id: item.id,
+            title: item.volumeInfo.title,
+            authors: item.volumeInfo.authors || ['Unknown Author'],
+            price: 499, // Static price for presentation
+            image: secureImage,
+            categories: item.volumeInfo.categories || ['Trending'],
+            rating: item.volumeInfo.averageRating || 4.5
+          };
+        });
         setBooks(formatted); // Update state
       } else {
         // Fallback to static data if no API results

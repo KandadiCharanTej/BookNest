@@ -36,15 +36,21 @@ export default function Home() {
       // If books are found in the API response
       if (data.items) {
         // Map the API data into our local book format
-        const formatted = data.items.map(item => ({
-          id: item.id,
-          title: item.volumeInfo.title,
-          authors: item.volumeInfo.authors || ['Unknown Author'],
-          price: 299, // Set a default price
-          image: item.volumeInfo.imageLinks?.thumbnail || null,
-          categories: item.volumeInfo.categories || ['General'],
-          rating: item.volumeInfo.averageRating || 4.2
-        }));
+        const formatted = data.items.map(item => {
+          // CRITICAL: Force HTTPS for all book images to prevent "Mixed Content" errors
+          const rawImage = item.volumeInfo.imageLinks?.thumbnail || null;
+          const secureImage = rawImage ? rawImage.replace('http://', 'https://') : null;
+
+          return {
+            id: item.id,
+            title: item.volumeInfo.title,
+            authors: item.volumeInfo.authors || ['Unknown Author'],
+            price: 299, // Set a default price
+            image: secureImage,
+            categories: item.volumeInfo.categories || ['General'],
+            rating: item.volumeInfo.averageRating || 4.2
+          };
+        });
         setRecommended(formatted); // Update state with new books
       } else {
         // If no items found, use static fallback data
@@ -62,13 +68,13 @@ export default function Home() {
   return (
     // Main home page wrapper
     <main className="home-page">
-      {/* Visual Hero Banner Section - This is the top part of the site */}
+      {/* Visual Hero Banner Section */}
       <Hero />
       
       {/* Main content container for grid and sections */}
       <div className="container">
         
-        {/* Section 1: Browse by Categories (Premium Addition) */}
+        {/* Section 1: Browse by Categories */}
         <section className="section">
           <div className="section-header">
             <h2 className="section-title">📂 Explore Categories</h2>
@@ -84,7 +90,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Section 2: Featured Indian Books (Static) */}
+        {/* Section 2: Featured Indian Books */}
         <section className="section">
           <div className="section-header">
             <h2 className="section-title">✨ {t.featuredTitle}</h2>
@@ -92,28 +98,24 @@ export default function Home() {
           </div>
           <div className="books-grid">
             {INDIAN_FEATURED_BOOKS.map(book => (
-              /* Rendering a card for each featured book */
               <BookCard key={book.id} book={book} />
             ))}
           </div>
         </section>
 
-        {/* Section 3: Recommended Books (Dynamic from API) */}
+        {/* Section 3: Recommended Books */}
         <section className="section">
           <div className="section-header">
             <h2 className="section-title">⭐ {t.recommendedTitle}</h2>
           </div>
           
-          {/* Conditional Rendering: Show loader if fetching, otherwise show grid */}
           {loading ? (
             <Loader />
           ) : (
             <div className="books-grid">
-              {/* Check if we have books to show */}
               {recommended.length > 0 ? (
                 recommended.map(book => <BookCard key={book.id} book={book} />)
               ) : (
-                /* Fallback text if no books are available */
                 <p>Unable to load books right now.</p>
               )}
             </div>
