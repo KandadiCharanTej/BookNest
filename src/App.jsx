@@ -18,7 +18,6 @@ import Cart from "./pages/Cart/Cart"; // Shopping cart page
 import Wishlist from "./pages/Wishlist/Wishlist"; // Saved books page
 import Profile from "./pages/Profile/Profile"; // User account management page
 import Orders from "./pages/Orders/Orders"; // Order history page
-import OrderSuccess from "./pages/OrderSuccess/OrderSuccess"; // Payment confirmation page
 import { Login, Signup } from "./pages/Auth"; // Login and Signup components
 
 // Importing Layout Components (Header/Footer)
@@ -63,7 +62,6 @@ function App() {
                     <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
                     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                     <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-                    <Route path="/order-success" element={<ProtectedRoute><OrderSuccess /></ProtectedRoute>} />
                   </Routes>
                 </div>
 

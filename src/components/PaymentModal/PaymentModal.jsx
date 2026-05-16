@@ -54,7 +54,8 @@ export default function PaymentModal({ isOpen, onClose }) {
     clearCart(); // Remove all items from the cart
     onClose(); // Close the modal
     setStep('select'); // Reset step for next time
-    navigate('/order-success'); // Redirect to success page
+    // REDIRECT TO HOME INSTEAD OF ORDER-SUCCESS AS REQUESTED
+    navigate('/'); 
   };
 
   // If the modal shouldn't be open, return nothing
@@ -158,7 +159,7 @@ export default function PaymentModal({ isOpen, onClose }) {
                 <span className="success-value">Confirmed</span>
               </div>
             </div>
-            {/* REMOVED VIEW SUMMARY AS REQUESTED - CHANGED TO FINISH */}
+            {/* FINISH BUTTON GOES STRAIGHT TO HOME NOW */}
             <button className="btn btn-primary modal-pay-btn" onClick={handleDone}>
               🎉 {t.finish || 'Finish'}
             </button>
