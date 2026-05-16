@@ -35,12 +35,12 @@ export default function Trending() {
       if (data.items) {
         // Map API data into our simplified format for the BookCard component
         const formatted = data.items.map(item => {
-           // CRITICAL: Force HTTPS for all book images to prevent "Mixed Content" security blocks
-          const rawImage = item.volumeInfo.imageLinks?.thumbnail || null;
-          const secureImage = rawImage ? rawImage.replace('http://', 'https://') : null;
+          // NEW GUARANTEED IMAGE FORMAT: Directly from Google's content server
+          const bookId = item.id;
+          const secureImage = `https://books.google.com/books/publisher/content/images/frontcover/${bookId}?fife=w400-h600&source=gbs_api`;
 
           return {
-            id: item.id,
+            id: bookId,
             title: item.volumeInfo.title,
             authors: item.volumeInfo.authors || ['Unknown Author'],
             price: 499, // Static price for presentation

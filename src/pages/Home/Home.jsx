@@ -30,19 +30,20 @@ export default function Home() {
       setLoading(true); // Show loader
       
       // Fetch books related to 'best selling books' using the current language
-      const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=best+selling+books&maxResults=10&langRestrict=${lang}`);
+      const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=best+selling+books+2024&maxResults=10&langRestrict=${lang}`);
       const data = await response.json(); // Parse response as JSON
       
       // If books are found in the API response
       if (data.items) {
         // Map the API data into our local book format
         const formatted = data.items.map(item => {
-          // CRITICAL: Force HTTPS for all book images to prevent "Mixed Content" errors
-          const rawImage = item.volumeInfo.imageLinks?.thumbnail || null;
-          const secureImage = rawImage ? rawImage.replace('http://', 'https://') : null;
+          // NEW GUARANTEED IMAGE FORMAT: Using the high-res publisher content link
+          // This format is much more stable than the standard thumbnail link
+          const bookId = item.id;
+          const secureImage = `https://books.google.com/books/publisher/content/images/frontcover/${bookId}?fife=w400-h600&source=gbs_api`;
 
           return {
-            id: item.id,
+            id: bookId,
             title: item.volumeInfo.title,
             authors: item.volumeInfo.authors || ['Unknown Author'],
             price: 299, // Set a default price
