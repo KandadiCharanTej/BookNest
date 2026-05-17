@@ -34,11 +34,12 @@ export default function Categories() {
       const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=subject:${encodeURIComponent(cat)}&maxResults=12`);
       const data = await res.json(); // Parse results
       
+      let results = [];
+      
       // If we got items back from the API
       if (data.items) {
         // Format the API items into our clean book object format
         const formatted = data.items.map(item => {
-          // NEW GUARANTEED IMAGE FORMAT: Directly from Google's content server
           const bookId = item.id;
           const secureImage = `https://books.google.com/books/publisher/content/images/frontcover/${bookId}?fife=w400-h600&source=gbs_api`;
 
@@ -52,15 +53,28 @@ export default function Categories() {
             rating: item.volumeInfo.averageRating || 4.1
           };
         });
-        setBooks(formatted); // Update book list state
-      } else {
-        // Use static local data if no API results found
-        setBooks(INDIAN_FEATURED_BOOKS.slice(0, 12));
+
+        // Strict local filtering of API results to match the category
+        results = formatted.filter(book => 
+          book.categories.some(c => c.toLowerCase().includes(cat.toLowerCase()))
+        );
       }
+      
+      // Fallback: If API returned no results or all results were filtered out, fall back to filtered mock data
+      if (results.length === 0) {
+        results = INDIAN_FEATURED_BOOKS.filter(book => 
+          book.categories.some(c => c.toLowerCase().includes(cat.toLowerCase()))
+        );
+      }
+      
+      setBooks(results); // Update book list state
     } catch (err) {
       // Handle network errors by logging and using fallback data
-      console.log(err);
-      setBooks(INDIAN_FEATURED_BOOKS.slice(0, 12));
+      console.log("Error fetching books by category, using filtered mock fallback:", err);
+      const fallback = INDIAN_FEATURED_BOOKS.filter(book => 
+        book.categories.some(c => c.toLowerCase().includes(cat.toLowerCase()))
+      );
+      setBooks(fallback);
     } finally {
       setLoading(false); // Hide loading spinner
     }

@@ -27,27 +27,24 @@ export default function Explore() {
   // State to track if data is currently being fetched
   const [loading, setLoading] = useState(false);
 
-  // Triggered whenever the search parameter in the URL or the language changes
-  useEffect(() => {
-    // Get the current search term from the URL, or use a default one
-    const searchTerm = searchParams.get('search') || 'trending bestsellers';
-    fetchResults(searchTerm); // Start the API fetch
-  }, [searchParams, lang]);
-
-  // Function to fetch book results from the Google Books API
+  // Function to fetch book results from the Google Books API and apply strict filtering
   const fetchResults = async (term) => {
     try {
       setLoading(true); // Start loading animation
+      
+      const lowerQuery = term.toLowerCase().trim();
+      const isDefaultQuery = lowerQuery === 'trending bestsellers' || lowerQuery === '';
       
       // Fetch books from the API based on the search term and current language
       const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(term)}&maxResults=20&langRestrict=${lang}`);
       const data = await response.json(); // Parse results
       
-      // If books are found
+      let results = [];
+      
+      // If books are found in Google Books API
       if (data.items) {
         // Map API data to our clean format for the BookCard component
         const formatted = data.items.map(item => {
-          // NEW GUARANTEED IMAGE FORMAT: High-res and HTTPS by default
           const bookId = item.id;
           const secureImage = `https://books.google.com/books/publisher/content/images/frontcover/${bookId}?fife=w400-h600&source=gbs_api`;
 
@@ -61,19 +58,68 @@ export default function Explore() {
             rating: item.volumeInfo.averageRating || 4.0
           };
         });
-        setBooks(formatted); // Update book list
-      } else {
-        // If no results, show fallback data
-        setBooks(INDIAN_FEATURED_BOOKS.slice(0, 20));
+
+        // If it's a specific search query (not the default view), strictly filter the Google Books results to match
+        if (!isDefaultQuery) {
+          results = formatted.filter(book => 
+            book.title.toLowerCase().includes(lowerQuery) ||
+            book.authors.some(author => author.toLowerCase().includes(lowerQuery)) ||
+            book.categories.some(cat => cat.toLowerCase().includes(lowerQuery))
+          );
+        } else {
+          results = formatted;
+        }
       }
+
+      // Fallback: If no results from API, or API results were filtered to empty, fall back to filtered mock data
+      if (results.length === 0) {
+        if (!isDefaultQuery) {
+          results = INDIAN_FEATURED_BOOKS.filter(book => 
+            book.title.toLowerCase().includes(lowerQuery) ||
+            book.authors.some(author => author.toLowerCase().includes(lowerQuery)) ||
+            book.categories.some(cat => cat.toLowerCase().includes(lowerQuery))
+          );
+        } else {
+          results = INDIAN_FEATURED_BOOKS;
+        }
+      }
+
+      setBooks(results); // Update book list
     } catch (error) {
-      // Handle network errors by logging and showing fallback data
-      console.log(error);
-      setBooks(INDIAN_FEATURED_BOOKS.slice(0, 20));
+      // Handle network errors by logging and showing filtered fallback data
+      console.log("Error fetching from API, using filtered mock data fallback:", error);
+      
+      const lowerQuery = term.toLowerCase().trim();
+      const isDefaultQuery = lowerQuery === 'trending bestsellers' || lowerQuery === '';
+      let results;
+      
+      if (!isDefaultQuery) {
+        results = INDIAN_FEATURED_BOOKS.filter(book => 
+          book.title.toLowerCase().includes(lowerQuery) ||
+          book.authors.some(author => author.toLowerCase().includes(lowerQuery)) ||
+          book.categories.some(cat => cat.toLowerCase().includes(lowerQuery))
+        );
+      } else {
+        results = INDIAN_FEATURED_BOOKS;
+      }
+      setBooks(results);
     } finally {
       setLoading(false); // Stop loading animation
     }
   };
+
+  // Triggered whenever the search parameter in the URL or the language changes
+  useEffect(() => {
+    // Sync input field value when URL changes (e.g. navigation or clearing search)
+    const urlQuery = searchParams.get('search') || '';
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setQuery(urlQuery);
+    
+    // Get the current search term from the URL, or use a default one
+    const searchTerm = urlQuery || 'trending bestsellers';
+    fetchResults(searchTerm); // Start the API fetch
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, lang]);
 
   // Function triggered when the user submits the search form
   const handleSearch = (e) => {
@@ -81,6 +127,9 @@ export default function Explore() {
     if (query.trim()) {
       // Update the URL with the new search term, which triggers the useEffect
       navigate(`/explore?search=${encodeURIComponent(query.trim())}`);
+    } else {
+      // If query is empty, navigate to /explore without search param (shows all/trending)
+      navigate('/explore');
     }
   };
 
@@ -99,7 +148,7 @@ export default function Explore() {
             placeholder={t.searchPlaceholder}
             value={query} // Bind input to local state
             onChange={(e) => setQuery(e.target.value)} // Update state on typing
-            className="form-input"
+            className="form-input explore-search-input"
           />
           {/* Submit button with search icon */}
           <button type="submit" className="btn btn-primary">🔍 {t.explore}</button>
@@ -110,12 +159,23 @@ export default function Explore() {
       {loading ? (
         <Loader />
       ) : (
-        <div className="books-grid">
-          {/* If books exist, map through them; otherwise show error text */}
+        <div>
+          {/* If books exist, map through them; otherwise show premium empty state */}
           {books.length > 0 ? (
-            books.map(book => <BookCard key={book.id} book={book} />)
+            <div className="books-grid">
+              {books.map(book => <BookCard key={book.id} book={book} />)}
+            </div>
           ) : (
-            <p>Unable to load books right now.</p>
+            <div className="no-results-container glass-card">
+              <span className="no-results-icon">🔍</span>
+              <h3 className="no-results-title">No Books Found</h3>
+              <p className="no-results-text">
+                We couldn't find any books matching "<strong>{searchParams.get('search') || query}</strong>".
+              </p>
+              <p className="no-results-hint">
+                Try checking the spelling or searching for a different book title, author, or genre.
+              </p>
+            </div>
           )}
         </div>
       )}
