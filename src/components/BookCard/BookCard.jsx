@@ -1,5 +1,5 @@
 // Importing React hooks and context consumers
-import { useState } from 'react'; // Hook to manage local image state
+import { useState, useEffect } from 'react'; // Hooks to manage local image and sync states
 import { Link } from 'react-router-dom'; // Component for internal navigation
 import { useCart } from '../../context/CartContext'; // Hook to handle shopping cart logic
 import { useWishlist } from '../../context/WishlistContext'; // Hook to handle wishlist logic
@@ -12,8 +12,15 @@ const PLACEHOLDER = 'https://images.unsplash.com/photo-1543004218-ee141104975a?q
 // Functional component to display an individual book card
 export default function BookCard({ book }) {
   // Local state to track image loading attempts
-  const [imageSrc, setImageSrc] = useState(book.image);
+  const [imageSrc, setImageSrc] = useState(book.image || PLACEHOLDER);
   const [retryCount, setRetryCount] = useState(0);
+
+  // Sync image source state when book image or ID updates (crucial for React re-render optimization)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setImageSrc(book.image || PLACEHOLDER);
+    setRetryCount(0);
+  }, [book.image, book.id]);
 
   // Destructuring helper functions and data from contexts
   const { cartItems, increaseQuantity, decreaseQuantity, addToCart } = useCart(); 
