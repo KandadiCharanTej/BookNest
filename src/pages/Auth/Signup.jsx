@@ -13,7 +13,7 @@ export function Signup() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (name && email && password) {
-      signup(name, email);
+      signup(name, email, password);
       navigate('/');
     } else {
       alert('Please fill all fields');

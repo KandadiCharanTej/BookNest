@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 // Importing hooks for context, state, and life-cycle management
 import { createContext, useContext, useState, useEffect } from 'react';
 
@@ -22,6 +23,7 @@ export function AuthProvider({ children }) {
     
     // If a user was found in storage, log them back in automatically
     if (storedUser) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser(JSON.parse(storedUser)); // Convert string back to object
       setIsAuthenticated(true); // Set login status to true
     }
@@ -30,42 +32,86 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  // Function to handle login simulation
+  // Function to handle login simulation with credential validation
   const login = (email, password) => {
-    // Create a fake user object for demonstration
-    const userData = {
-      name: 'Charan Kumar',
-      email: email,
-      address: {
-        fullName: 'Charan Kumar',
-        mobile: '9876543210',
-        street: '123 Book St',
-        area: 'Hitech City',
-        city: 'Hyderabad',
-        state: 'Telangana',
-        pincode: '500081'
-      }
-    };
+    // Define pre-configured default credentials for the Viva demo
+    const defaultCredentials = [
+      { email: 'charan@booknest.com', password: 'charan123', name: 'Charan Tej' },
+      { email: 'admin@booknest.com', password: 'admin123', name: 'Admin User' }
+    ];
+
+    // Find if the entered credentials match any default account
+    const matchedUser = defaultCredentials.find(
+      u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+    );
+
+    if (matchedUser) {
+      const userData = {
+        name: matchedUser.name,
+        email: matchedUser.email,
+        address: {
+          fullName: matchedUser.name,
+          mobile: '9876543210',
+          street: '123 Book St',
+          area: 'Hitech City',
+          city: 'Hyderabad',
+          state: 'Telangana',
+          pincode: '500081'
+        }
+      };
+      
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('token', 'loggedin');
+      setUser(userData);
+      setIsAuthenticated(true);
+      return true;
+    }
     
-    // Save user data to local storage for persistence
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('token', 'loggedin'); // Save a fake session token
+    // Also allow any custom email/password registered during signup
+    const storedUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    const matchedRegistered = storedUsers.find(
+      u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+    );
     
-    // Update local React state
-    setUser(userData);
-    setIsAuthenticated(true);
+    if (matchedRegistered) {
+      const userData = {
+        name: matchedRegistered.name,
+        email: matchedRegistered.email,
+        address: {
+          fullName: matchedRegistered.name,
+          mobile: '9988776655',
+          street: '456 Lane Rd',
+          area: 'Madhapur',
+          city: 'Hyderabad',
+          state: 'Telangana',
+          pincode: '500081'
+        }
+      };
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('token', 'loggedin');
+      setUser(userData);
+      setIsAuthenticated(true);
+      return true;
+    }
+
+    return false; // Authentication failed
   };
 
-  // Function to handle signup simulation
-  const signup = (name, email) => {
-    // Create new user data based on signup inputs
+  // Function to handle signup simulation and persistence
+  const signup = (name, email, password) => {
     const userData = { name, email, address: {} };
     
-    // Save to storage
+    // Register the user to the mock users list
+    const storedUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    if (!storedUsers.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+      storedUsers.push({ name, email, password });
+      localStorage.setItem('registeredUsers', JSON.stringify(storedUsers));
+    }
+    
+    // Save active user session
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', 'loggedin');
     
-    // Update state
     setUser(userData);
     setIsAuthenticated(true);
   };

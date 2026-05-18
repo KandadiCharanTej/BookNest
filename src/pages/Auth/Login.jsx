@@ -6,16 +6,23 @@ import './Auth.css';
 export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setError(''); // Clear previous error
+    
     if (email && password) {
-      login(email, password);
-      navigate('/');
+      const success = login(email, password);
+      if (success) {
+        navigate('/');
+      } else {
+        setError('Invalid credentials! Please use: charan@booknest.com / charan123');
+      }
     } else {
-      alert('Please enter email and password');
+      setError('Please enter both email and password');
     }
   };
 
@@ -23,6 +30,7 @@ export function Login() {
     <div className="auth-page container">
       <div className="auth-card glass-card">
         <h2>Login</h2>
+        {error && <div className="error-msg">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email</label>
