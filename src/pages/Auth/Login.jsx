@@ -19,7 +19,7 @@ export function Login() {
       if (success) {
         navigate('/');
       } else {
-        setError('Invalid credentials! Please use: charan@booknest.com / charan123');
+        setError('Invalid credentials! Please enter valid credentials.');
       }
     } else {
       setError('Please enter both email and password');
